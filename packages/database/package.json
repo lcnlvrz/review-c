@@ -1,0 +1,14 @@
+{
+  "name": "database",
+  "main": "./dist/index.js",
+  "scripts": {
+    "dev": "tsup ./index.ts --watch"
+  },
+  "dependencies": {
+    "@prisma/client": "latest"
+  },
+  "devDependencies": {
+    "prisma": "4.11.0",
+    "tsup": "^6.6.3"
+  }
+}

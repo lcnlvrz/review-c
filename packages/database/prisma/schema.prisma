@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  firstName         String
+  lastName          String
+  avatar            String             @db.Text
+  identityProviders IdentityProvider[]
+  Memberships       Member[]
+  Workspace         Workspace[]
+}
+
+model IdentityProvider {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  providerId String
+  provider   Provider
+
+  @@index([userId])
+}
+
+enum MemberRole {
+  OWNER
+  MEMBER
+}
+
+model Invitation {
+  id          Int        @id @default(autoincrement())
+  token       String     @db.Text
+  createdAt   DateTime   @default(now())
+  email       String
+  role        MemberRole
+  Workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+
+  @@index([workspaceId])
+}
+
+model Member {
+  id                   Int        @id @default(autoincrement())
+  user                 User       @relation(fields: [userId], references: [id])
+  userId               Int
+  workspace            Workspace  @relation(fields: [workspaceId], references: [id])
+  workspaceId          String
+  invitationAcceptedAt DateTime?
+  role                 MemberRole
+
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+model Workspace {
+  id          String       @id @default(uuid())
+  name        String
+  description String       @db.Text
+  members     Member[]
+  User        User?        @relation(fields: [userId], references: [id])
+  userId      Int?
+  invitations Invitation[]
+
+  @@index([userId])
+}
+
+enum Provider {
+  GOOGLE
+  FACEBOOK
+  GITHUB
+}

@@ -1,0 +1,12 @@
+{
+  "name": "devtools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "docker-compose up -d || docker compose up -d"
+  },
+  "keywords": [],
+  "author": "Luciano Alvarez",
+  "license": "ISC"
+}

@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  db:
+    container_name: db
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'admin'
+      MYSQL_ROOT_PASSWORD: 'admin'
+    ports:
+      - '3306:3306'
+    networks:
+      - baratin
+    volumes:
+      - my-db:/var/lib/mysql
+    extra_hosts:
+      - 'docker.localhost:host-gateway'
+
+volumes:
+  my-db:
+
+networks:
+  baratin:
+    name: baratin
