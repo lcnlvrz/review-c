@@ -1,0 +1,7 @@
+body {
+  font-family: var(--dm-font);
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
