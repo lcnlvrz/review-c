@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Post, Put, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common'
 import { Invitation, User, Workspace } from 'database'
 import { ReqUser } from '../auth/decorators/user.decorator'
 import { UserGuard } from '../auth/guards/user.guard'
@@ -6,8 +14,12 @@ import { ReqInvitation } from './decorators/invitation.decorator'
 import { RolesAllowed } from './decorators/roles-allowed.decorator'
 import { ReqWorkspace } from './decorators/workspace.decorator'
 import { CreateWorkspaceDTO } from './dtos/create-workspace.dto'
-import { InviteGuestToWorkspaceDTO } from './dtos/invite-guest-to-workspace.dto'
+import {
+  IInviteGuestsToWorkspaceDTO,
+  InviteGuestsToWorkspaceDTO,
+} from './dtos/invite-guests-to-workspace.dto'
 import { UpdateWorkspaceDTO } from './dtos/update-workspace.dto'
+import { BulkInvitationsGuard } from './guards/bulk-invitations.guard'
 import { InvitationGuard } from './guards/invitation.guard'
 import { WorkspaceInvitationTokenGuard } from './guards/workspace-invitation-token.guard'
 import { WorkspaceMemberRoleGuard } from './guards/workspace-member-role.guard'
@@ -28,6 +40,36 @@ export class WorkspaceController {
       dto,
       user,
     })
+  }
+
+  @Get('me')
+  @UseGuards(UserGuard)
+  async listWorkspaces(@ReqUser() user: User) {
+    const workspaces = await this.workspaceService.listWorkspaces({
+      user,
+    })
+
+    return {
+      workspaces,
+    }
+  }
+
+  @Get(':workspaceId')
+  @UseGuards(UserGuard, WorkspaceGuard)
+  async retrieveWorkspace(@ReqWorkspace() workspace: Workspace) {
+    return workspace
+  }
+
+  @Get('/:workspaceId/invitation')
+  @UseGuards(UserGuard, WorkspaceGuard)
+  async listInvitationsWorkspace(@ReqWorkspace() workspace: Workspace) {
+    const invitations = await this.workspaceService.listInvitations({
+      workspace,
+    })
+
+    return {
+      invitations,
+    }
   }
 
   @Put(':workspaceId')
@@ -71,12 +113,19 @@ export class WorkspaceController {
 
   @Post(':workspaceId/invitation')
   @RolesAllowed('OWNER')
-  @UseGuards(UserGuard, WorkspaceGuard, WorkspaceMemberRoleGuard)
+  @UseGuards(
+    UserGuard,
+    WorkspaceGuard,
+    WorkspaceMemberRoleGuard,
+    BulkInvitationsGuard
+  )
   async inviteToWorkspace(
-    @Body() dto: InviteGuestToWorkspaceDTO,
+    @Body() dto: IInviteGuestsToWorkspaceDTO,
     @ReqUser() user: User,
     @ReqWorkspace() workspace: Workspace
   ) {
+    console.log('typeof dto', typeof dto)
+
     return await this.workspaceService.inviteToWorkspace({
       dto,
       user,

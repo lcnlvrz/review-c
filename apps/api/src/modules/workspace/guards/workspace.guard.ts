@@ -38,7 +38,7 @@ export class WorkspaceGuard implements CanActivate {
 
     const workspace = await this.dbService.workspace.findFirst({
       where: {
-        id: dto.workspaceId,
+        nanoid: dto.workspaceId,
         members: {
           some: {
             userId: user.id,

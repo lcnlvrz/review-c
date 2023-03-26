@@ -55,6 +55,7 @@ export class UserGuard implements CanActivate {
         firstName: true,
         lastName: true,
         email: true,
+        Memberships: true,
       },
     })
 

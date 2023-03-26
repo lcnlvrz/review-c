@@ -4,12 +4,15 @@ export interface IAppError {
   code: string
 }
 
-export class AppError extends Error implements IAppError {
+export class AppError<T extends object = object>
+  extends Error
+  implements IAppError
+{
   status: number
   description: string
   code: string
 
-  constructor(input: IAppError) {
+  constructor(input: IAppError & T) {
     super(input.description)
 
     Object.assign(this, input)

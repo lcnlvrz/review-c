@@ -1,7 +1,6 @@
-import { IsString, IsUUID } from 'class-validator'
+import { IsString } from 'class-validator'
 
 export class WorkspaceParamDTO {
   @IsString()
-  @IsUUID()
   workspaceId: string
 }

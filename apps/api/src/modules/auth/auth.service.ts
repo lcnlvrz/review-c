@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common'
+import { MemberRole, User } from 'database'
 import { DatabaseService } from '../database/database.service'
+import { WorkspaceService } from '../workspace/workspace.service'
 import { SignInUserDTO } from './dtos/sign-in-user.dto'
 import { IdentityProvider } from './idp/idp'
+const nanoid = require('nanoid')
 
 @Injectable()
 export class AuthService {
@@ -17,16 +20,19 @@ export class AuthService {
       return idp.error
     }
 
-    let userId: number
+    let user: User
 
     const identityProvider = await this.dbService.identityProvider.findFirst({
       where: {
         providerId: idp.data.idpID,
       },
+      include: {
+        user: true,
+      },
     })
 
     if (identityProvider) {
-      userId = identityProvider.userId
+      user = identityProvider.user
     }
 
     if (!identityProvider) {
@@ -37,7 +43,7 @@ export class AuthService {
         lastName: idp.data.lastName,
       }
 
-      const user = await this.dbService.user.upsert({
+      const _user = await this.dbService.user.upsert({
         where: {
           email: idp.data.email,
         },
@@ -53,11 +59,37 @@ export class AuthService {
         update: userFields,
       })
 
-      userId = user.id
+      user = _user
+    }
+
+    const workspace = await this.dbService.workspace.findFirst({
+      where: {
+        userId: user.id,
+      },
+      select: {
+        userId: true,
+      },
+    })
+
+    if (!workspace) {
+      await this.dbService.workspace.create({
+        data: {
+          nanoid: nanoid.nanoid(),
+          description: 'My first workspace',
+          name: `${user.firstName}'s workspace`,
+          userId: user.id,
+          members: {
+            create: {
+              userId: user.id,
+              role: MemberRole.OWNER,
+            },
+          },
+        },
+      })
     }
 
     return {
-      userId,
+      userId: user.id,
     }
   }
 }

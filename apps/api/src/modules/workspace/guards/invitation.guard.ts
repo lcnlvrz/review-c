@@ -23,6 +23,8 @@ export class InvitationGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest()
 
+    console.log('params', request.params)
+
     const dto = plainToInstance(InvitationParamDTO, request.params)
 
     try {

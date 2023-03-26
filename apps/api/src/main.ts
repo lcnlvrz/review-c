@@ -7,6 +7,6 @@ async function bootstrap() {
 
   configApp(app)
 
-  await app.listen(3002)
+  await app.listen(3003)
 }
 bootstrap()

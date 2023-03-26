@@ -5,9 +5,10 @@ import { Invitation, MemberRole, User, Workspace } from 'database'
 import { DatabaseService } from '../database/database.service'
 import { Emailer } from '../notification/emailer'
 import { CreateWorkspaceDTO } from './dtos/create-workspace.dto'
-import { InviteGuestToWorkspaceDTO } from './dtos/invite-guest-to-workspace.dto'
+import { InviteGuestsToWorkspaceDTO } from './dtos/invite-guests-to-workspace.dto'
 import { UpdateWorkspaceDTO } from './dtos/update-workspace.dto'
 import { INVITATION_JWT_SERVICE } from './invitation-jwt.module'
+const nanoid = require('nanoid')
 
 export interface IJWTInvitationClaims {
   sub: string
@@ -23,9 +24,13 @@ export class WorkspaceService {
     private readonly jwtService: JwtService
   ) {}
 
-  async createWorkspace(input: { dto: CreateWorkspaceDTO; user: User }) {
+  async createWorkspace(input: {
+    dto: CreateWorkspaceDTO
+    user: Pick<User, 'id'>
+  }) {
     const workspace = await this.dbService.workspace.create({
       data: {
+        nanoid: nanoid.nanoid(),
         name: input.dto.name,
         description: input.dto.description,
         members: {
@@ -59,35 +64,47 @@ export class WorkspaceService {
   }
 
   async inviteToWorkspace(input: {
-    dto: InviteGuestToWorkspaceDTO
+    dto: InviteGuestsToWorkspaceDTO
     user: User
     workspace: Workspace
   }) {
-    const claims: IJWTInvitationClaims = {
-      sub: input.dto.email,
-    }
+    const invitationsToInsert = input.dto.invitations.map(({ email }) => {
+      const claims: IJWTInvitationClaims = {
+        sub: email,
+      }
 
-    const token = this.jwtService.sign(claims)
+      const token = this.jwtService.sign(claims)
 
-    const invitation = await this.dbService.invitation.create({
-      data: {
+      return {
+        email,
         role: MemberRole.MEMBER,
-        email: input.dto.email,
-        workspaceId: input.workspace.id,
         token,
-      },
+        workspaceId: input.workspace.id,
+      }
     })
 
-    console.log('this.emailer', this.emailer)
+    const invitations = await this.dbService.$transaction(
+      invitationsToInsert.map((invitation) => {
+        return this.dbService.invitation.create({
+          data: invitation,
+        })
+      })
+    )
 
-    await this.emailer.send('workspaceInvitation', {
-      url: `${this.configService.get(
-        'DASHBOARD_APP_URL'
-      )}/register/invitation?token=${token}`,
-    })
+    await this.emailer.sendBulk(
+      'workspaceInvitation',
+      invitations.map((invitation) => {
+        return {
+          email: invitation.email,
+          url: `${this.configService.get(
+            'DASHBOARD_APP_URL'
+          )}/register/invitation?token=${invitation.token}`,
+        }
+      })
+    )
 
     return {
-      invitationId: invitation.id,
+      invitations: invitations.map((ele) => ({ id: ele.id })),
     }
   }
 
@@ -139,9 +156,13 @@ export class WorkspaceService {
           },
         },
       },
-      include: {
-        members: true,
-        invitations: true,
+    })
+  }
+
+  async listInvitations(input: { workspace: Workspace }) {
+    return await this.dbService.invitation.findMany({
+      where: {
+        workspaceId: input.workspace.id,
       },
     })
   }
