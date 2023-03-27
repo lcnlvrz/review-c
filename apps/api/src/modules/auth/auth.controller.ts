@@ -57,9 +57,33 @@ export class AuthController {
     })
   }
 
+  @Get('sign-out')
+  @UseGuards(UserGuard)
+  async signOutUser(@Res() res: Response) {
+    res.cookie(JWT_SESSION_COOKIE_NAME, '', {
+      maxAge: 0,
+    })
+
+    return res.status(HttpStatus.OK).json({
+      signOut: true,
+    })
+  }
+
   @Get('me')
   @UseGuards(UserGuard)
   async me(@ReqUser() user: User) {
     return user
+  }
+
+  @Get('/me/invitation')
+  @UseGuards(UserGuard)
+  async listInvitations(@ReqUser() user: User) {
+    const invitations = await this.authService.listInvitations({
+      user,
+    })
+
+    return {
+      invitations,
+    }
   }
 }

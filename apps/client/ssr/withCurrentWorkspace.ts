@@ -1,9 +1,10 @@
+import type { WorkspaceWithMember } from '@/providers/WorkspaceProvider'
 import { WorkspaceService } from '@/services/workspace.service'
 import type { Workspace } from 'database'
-import { SSFunction } from './compose'
+import type { SSFunction } from './compose'
 
 export const withCurrentWorkspace: SSFunction<{
-  currentWorkspace: Workspace
+  currentWorkspace: WorkspaceWithMember
 }> = async (ctx, cookie) => {
   if (!ctx?.params?.workspaceId || Array.isArray(ctx?.params?.workspaceId)) {
     return {
@@ -16,6 +17,8 @@ export const withCurrentWorkspace: SSFunction<{
       ctx?.params?.workspaceId as string,
       cookie
     )
+
+    console.log('workspace', workspace)
 
     return {
       props: {

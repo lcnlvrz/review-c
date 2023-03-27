@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator'
+import { IsBoolean, IsEnum, IsNotEmpty, IsString } from 'class-validator'
 import { Provider } from 'database'
 
 export class SignInUserDTO {
@@ -9,4 +9,7 @@ export class SignInUserDTO {
   @IsString()
   @IsNotEmpty()
   token: string
+
+  @IsBoolean()
+  force_ws: boolean = true
 }

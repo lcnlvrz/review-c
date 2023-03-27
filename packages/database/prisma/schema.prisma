@@ -20,6 +20,7 @@ model User {
   identityProviders IdentityProvider[]
   Memberships       Member[]
   Workspace         Workspace[]
+  Invitation        Invitation[]
 }
 
 model IdentityProvider {
@@ -33,37 +34,40 @@ model IdentityProvider {
 }
 
 enum MemberRole {
-  OWNER
+  ADMIN
   MEMBER
 }
 
 model Invitation {
-  id          Int        @id @default(autoincrement())
-  token       String     @db.Text
+  id          String     @id
   createdAt   DateTime   @default(now())
   email       String
   role        MemberRole
-  Workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+  invitedBy   User       @relation(fields: [invitedById], references: [id])
+  invitedById Int
   workspaceId String
 
+  @@unique([email, workspaceId])
   @@index([workspaceId])
+  @@index([invitedById])
 }
 
 model Member {
   id                   Int        @id @default(autoincrement())
   user                 User       @relation(fields: [userId], references: [id])
   userId               Int
-  workspace            Workspace  @relation(fields: [workspaceId], references: [id])
   workspaceId          String
   invitationAcceptedAt DateTime?
   role                 MemberRole
+  workspace            Workspace  @relation(fields: [workspaceId], references: [id])
 
   @@index([userId])
   @@index([workspaceId])
 }
 
 model Workspace {
-  id          String       @id @default(uuid())
+  id          String       @id
   name        String
   description String       @db.Text
   members     Member[]

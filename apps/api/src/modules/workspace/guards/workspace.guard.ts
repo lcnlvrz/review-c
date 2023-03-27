@@ -15,9 +15,8 @@ import { AppError } from 'src/common/error'
 import { USER_REQUEST_KEY } from 'src/modules/auth/guards/user.guard'
 import { DatabaseService } from 'src/modules/database/database.service'
 import { WorkspaceParamDTO } from '../dtos/workspace-param.dto'
+import { MEMBER_REQUEST_KEY } from './member.guard'
 import { WORKSPACE_REQUEST_KEY } from './workspace-member-role.guard'
-
-export const WORKSPACE_MEMBER_REQUEST_KEY = 'workspace_member'
 
 @Injectable()
 export class WorkspaceGuard implements CanActivate {
@@ -38,7 +37,7 @@ export class WorkspaceGuard implements CanActivate {
 
     const workspace = await this.dbService.workspace.findFirst({
       where: {
-        nanoid: dto.workspaceId,
+        id: dto.workspaceId,
         members: {
           some: {
             userId: user.id,
@@ -68,7 +67,7 @@ export class WorkspaceGuard implements CanActivate {
 
     const [member] = workspace.members
 
-    request[WORKSPACE_MEMBER_REQUEST_KEY] = member
+    request[MEMBER_REQUEST_KEY] = member
 
     return true
   }

@@ -1,6 +1,6 @@
 import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { PrismaClient } from 'database'
+import { PrismaClient, Workspace } from 'database'
 
 export const DATABASE_URL = 'DATABASE_URL'
 

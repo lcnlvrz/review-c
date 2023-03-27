@@ -27,6 +27,8 @@ import {
 } from './Tooltip'
 import { WorkspaceService } from '@/services/workspace.service'
 import { useError } from '@/hooks/useError'
+import { useWorkspace } from '@/hooks/useWorkspace'
+import { TextErrorMessage } from './TextErrorMessage'
 
 const EmailForm = (props: {
   onSubmit: (
@@ -65,7 +67,7 @@ const EmailForm = (props: {
       </div>
 
       {errors.email && (
-        <p className="mt-2 text-sm text-red-500">{errors.email.message}</p>
+        <TextErrorMessage>{errors.email.message}</TextErrorMessage>
       )}
     </form>
   )
@@ -73,7 +75,6 @@ const EmailForm = (props: {
 
 interface Props {
   isOpen: boolean
-  currentWorkspace: Workspace
   onClose: () => void
   onOpen: () => void
 }
@@ -96,11 +97,13 @@ const InvitationsForm = (props: Props) => {
 
   const error = useError()
 
+  const { currentWorkspace } = useWorkspace()
+
   const onInvite = useCallback(
     (data: InvitationsSchema) => {
       setIsLoading(true)
 
-      WorkspaceService.invite(props.currentWorkspace.nanoid, data)
+      WorkspaceService.invite(currentWorkspace.id, data)
         .then((res) => {
           toast({
             title: 'Invitations sent',
@@ -112,7 +115,7 @@ const InvitationsForm = (props: Props) => {
         .catch(error.handleError)
         .finally(() => setIsLoading(false))
     },
-    [props.currentWorkspace.id]
+    [currentWorkspace.id]
   )
 
   const fields = watch()
@@ -195,6 +198,8 @@ const InvitationsForm = (props: Props) => {
 }
 
 export const InviteWorkspaceDialog = (props: Props) => {
+  const { currentWorkspace } = useWorkspace()
+
   return (
     <Dialog
       onOpenChange={(open) => {
@@ -209,7 +214,7 @@ export const InviteWorkspaceDialog = (props: Props) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="font-roboto">
-            Invite people to {props.currentWorkspace.name}
+            Invite people to {currentWorkspace.name}
           </DialogTitle>
           <DialogDescription>
             <InvitationsForm {...props} />

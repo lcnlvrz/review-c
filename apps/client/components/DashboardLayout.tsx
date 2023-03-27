@@ -1,6 +1,16 @@
+import { useAuth } from '@/hooks/useAuth'
 import { useDisclosure } from '@/hooks/useDisclosure'
+import { useError } from '@/hooks/useError'
+import { useWorkspace } from '@/hooks/useWorkspace'
 import { montserrat } from '@/pages/_app'
-import { Circle, Plus, UserPlus } from 'lucide-react'
+import { AuthService } from '@/services/auth.service'
+import { cn } from '@/utils/cn'
+import { useQueryClient } from '@tanstack/react-query'
+import type { Workspace } from 'database'
+import { Circle, LogOut, Plus } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useCallback } from 'react'
 import { Button } from './Button'
 import {
   DropdownMenu,
@@ -11,15 +21,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './DropdownMenu'
-import { InvitePeopleTrigger } from './InvitePeopleTrigger'
 import { InviteWorkspaceDialog } from './InviteWorkspaceDialog'
 import { ManageInvitationsDialog } from './ManageInvitationsDialog'
-import type { User, Workspace } from 'database'
+import { ManageMembersDialog } from './ManageMembersDialog'
+import { UserAvatar } from './UserAvatar'
 
 export const DashboardLayout = (
   props: React.PropsWithChildren<{
-    auth: User
-    currentWorkspace: Workspace
     workspaces: Workspace[]
   }>
 ) => {
@@ -27,64 +35,120 @@ export const DashboardLayout = (
   const manageMembersDisclosure = useDisclosure()
   const manageInvitationsDisclosure = useDisclosure()
 
+  const { currentWorkspace } = useWorkspace()
+
+  const { auth } = useAuth()
+
+  const queryClient = useQueryClient()
+
+  const router = useRouter()
+
+  const error = useError()
+
+  const onLogout = useCallback(() => {
+    AuthService.signOut()
+      .then((res) => {
+        queryClient.clear()
+        router.push('/')
+      })
+      .catch(error.handleError)
+  }, [])
+
   return (
     <div className="">
       <div className="h-16 bg-gray-300 flex items-center justify-between px-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="font-bold hover:text-blue-500 transition-all">
-              {props.currentWorkspace.name}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuGroup>
-              <InvitePeopleTrigger
-                {...invitePeopleDisclosure}
-                currentWorkspace={props.currentWorkspace}
-              />
-
-              {/* TODO: LIMIT OPTIONS BASED ON MEMBER ROLE */}
-              <DropdownMenuItem onClick={manageInvitationsDisclosure.onOpen}>
-                <span className="truncate">Manage invitations</span>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem>
-                <span className="truncate">Manage members</span>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className={`${montserrat.variable} font-sans`}>
-                ALL WORKSPACES
-              </DropdownMenuLabel>
+        <div className="flex flex-row justify-between items-center w-full">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="font-bold hover:text-blue-500 transition-all">
+                {currentWorkspace.name}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>
-                {props.workspaces.map((workspace) => {
-                  return (
-                    <DropdownMenuItem key={workspace.id}>
-                      <Circle className="mr-2 h-4 w-4 text-green-300" />
-                      <span>{workspace.name}</span>
-                    </DropdownMenuItem>
-                  )
-                })}
+                {currentWorkspace.member.role === 'OWNER' && (
+                  <DropdownMenuItem onClick={invitePeopleDisclosure.onOpen}>
+                    <span className="truncate font-montserrat">
+                      Invite people to {currentWorkspace.name}
+                    </span>
+                  </DropdownMenuItem>
+                )}
+
+                {/* TODO: LIMIT OPTIONS BASED ON MEMBER ROLE */}
+                <DropdownMenuItem onClick={manageInvitationsDisclosure.onOpen}>
+                  <span className="truncate">Invitations</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onClick={manageMembersDisclosure.onOpen}>
+                  <span className="truncate">Members</span>
+                </DropdownMenuItem>
               </DropdownMenuGroup>
-              <Button className="font-bold" variant={'ghost'} size={'sm'}>
-                <Plus className="mr-2 h-4 w-4 text-black" />
-                Create Workspace
-              </Button>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <InviteWorkspaceDialog
-          {...invitePeopleDisclosure}
-          currentWorkspace={props.currentWorkspace}
-        />
-        <ManageInvitationsDialog
-          {...manageInvitationsDisclosure}
-          currentWorkspace={props.currentWorkspace}
-        />
+              <DropdownMenuSeparator />
+
+              <DropdownMenuGroup>
+                <DropdownMenuLabel
+                  className={`${montserrat.variable} font-sans`}
+                >
+                  ALL WORKSPACES
+                </DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  {props.workspaces.map((workspace) => {
+                    const isCurrentWorkspace =
+                      currentWorkspace.id === workspace.id
+
+                    return (
+                      <Link href={`/workspace/${workspace.id}`}>
+                        <DropdownMenuItem
+                          className="flex flex-row space-x-2 items-center"
+                          key={workspace.id}
+                        >
+                          <Circle
+                            className={cn('h-4 w-4 ', {
+                              'text-green-300 fill-green-300':
+                                isCurrentWorkspace,
+                              'text-gray-300 ': !isCurrentWorkspace,
+                            })}
+                          />
+
+                          <span>{workspace.name}</span>
+                        </DropdownMenuItem>
+                      </Link>
+                    )
+                  })}
+                </DropdownMenuGroup>
+                <Link href={'/workspace/create'}>
+                  <Button
+                    className="font-bold w-full"
+                    variant={'ghost'}
+                    size={'sm'}
+                  >
+                    <Plus className="mr-2 h-4 w-4 text-black" />
+                    Create Workspace
+                  </Button>
+                </Link>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button>
+                <UserAvatar user={auth} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuItem onClick={onLogout}>
+                <LogOut className="mr-2 h-4 w-4 text-black" />
+                <span className="truncate">Sign out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <InviteWorkspaceDialog {...invitePeopleDisclosure} />
+        <ManageInvitationsDialog {...manageInvitationsDisclosure} />
+        <ManageMembersDialog {...manageMembersDisclosure} />
       </div>
-      {props.children}
+      <div className="p-10">{props.children}</div>
     </div>
   )
 }

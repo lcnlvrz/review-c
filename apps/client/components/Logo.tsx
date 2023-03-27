@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React, { useMemo } from 'react'
 
 const sizes = {

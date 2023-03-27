@@ -1,11 +1,12 @@
 import { Exclude, Expose } from 'class-transformer'
-import { IsOptional, IsString } from 'class-validator'
+import { IsOptional, IsString, MaxLength } from 'class-validator'
 
 @Exclude()
 export class CreateWorkspaceDTO {
   @Expose()
   @IsString()
   @IsOptional()
+  @MaxLength(100, { message: 'Name is too long' })
   name: string
 
   @Expose()

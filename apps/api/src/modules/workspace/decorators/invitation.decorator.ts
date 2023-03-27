@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
 import { Request } from 'express'
-import { INVITATION_REQUEST_KEY } from '../guards/workspace-invitation-token.guard'
+import { INVITATION_REQUEST_KEY } from '../guards/invitation.guard'
 
 export const ReqInvitation = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {

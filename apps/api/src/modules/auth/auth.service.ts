@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { MemberRole, User } from 'database'
 import { DatabaseService } from '../database/database.service'
-import { WorkspaceService } from '../workspace/workspace.service'
 import { SignInUserDTO } from './dtos/sign-in-user.dto'
 import { IdentityProvider } from './idp/idp'
 const nanoid = require('nanoid')
@@ -62,34 +61,44 @@ export class AuthService {
       user = _user
     }
 
-    const workspace = await this.dbService.workspace.findFirst({
-      where: {
-        userId: user.id,
-      },
-      select: {
-        userId: true,
-      },
-    })
-
-    if (!workspace) {
-      await this.dbService.workspace.create({
-        data: {
-          nanoid: nanoid.nanoid(),
-          description: 'My first workspace',
-          name: `${user.firstName}'s workspace`,
+    if (input.force_ws) {
+      const workspace = await this.dbService.workspace.findFirst({
+        where: {
           userId: user.id,
-          members: {
-            create: {
-              userId: user.id,
-              role: MemberRole.OWNER,
-            },
-          },
+        },
+        select: {
+          userId: true,
         },
       })
+
+      if (!workspace) {
+        await this.dbService.workspace.create({
+          data: {
+            id: nanoid.nanoid(),
+            description: 'My first workspace',
+            name: `${user.firstName}'s workspace`,
+            userId: user.id,
+            members: {
+              create: {
+                userId: user.id,
+                role: MemberRole.OWNER,
+              },
+            },
+          },
+        })
+      }
     }
 
     return {
       userId: user.id,
     }
+  }
+
+  async listInvitations(input: { user: User }) {
+    return await this.dbService.invitation.findMany({
+      where: {
+        email: input.user.email,
+      },
+    })
   }
 }

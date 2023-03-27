@@ -9,12 +9,12 @@ httpClient.interceptors.response.use(
     return response
   },
   function (error) {
-    console.log('error', error)
-
     if (axios.isAxiosError(error)) {
       console.log(
         '[AXIOS INTERCEPTOR ERROR] PATH:',
         error.request.path,
+        'METHOD',
+        error.request.method,
         'RESPONSE:',
         error.response?.data
       )

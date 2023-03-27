@@ -1,4 +1,3 @@
-import type { Invitation, Workspace } from 'database'
 import {
   Dialog,
   DialogContent,
@@ -7,13 +6,13 @@ import {
 } from '@/components/Dialog'
 import { INVITATIONS_QUERY_KEY } from '@/constants/query-keys'
 import { useDisclosure, UseDisclosureReturn } from '@/hooks/useDisclosure'
+import { useError } from '@/hooks/useError'
+import { useToast } from '@/hooks/useToast'
+import { useWorkspace } from '@/hooks/useWorkspace'
 import { WorkspaceService } from '@/services/workspace.service'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Button } from './Button'
-import { DialogHeader } from './Dialog'
-import { ScrollArea } from './ScrollArea'
-import { Skeleton } from './Skeleton'
-import { SomethingWrongErr } from './SomethingWrongErr'
+import type { Invitation } from 'database'
+import { useCallback, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,20 +24,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from './AlertDialog'
-import { useCallback, useState } from 'react'
-import { useError } from '@/hooks/useError'
-import { useToast } from '@/hooks/useToast'
+import { Button } from './Button'
+import { DialogHeader } from './Dialog'
+import { InviteWorkspaceDialog } from './InviteWorkspaceDialog'
+import { ScrollArea } from './ScrollArea'
+import { Skeleton } from './Skeleton'
+import { SomethingWrongErr } from './SomethingWrongErr'
 
-interface AdditionalProps {
-  currentWorkspace: Workspace
-}
+interface Props extends UseDisclosureReturn {}
 
-interface Props extends UseDisclosureReturn, AdditionalProps {}
-
-const RevokeInvitation = (props: {
-  invitation: Invitation
-  workspaceId: string
-}) => {
+const RevokeInvitation = (props: { invitation: Invitation }) => {
   const { onClose, isOpen, onOpen } = useDisclosure()
 
   const [isLoading, setIsLoading] = useState(false)
@@ -48,10 +43,12 @@ const RevokeInvitation = (props: {
   const error = useError()
   const { toast } = useToast()
 
+  const { currentWorkspace } = useWorkspace()
+
   const onRevoke = useCallback(() => {
     setIsLoading(true)
 
-    WorkspaceService.removeInvitation(props.workspaceId, props.invitation.id)
+    WorkspaceService.removeInvitation(currentWorkspace.id, props.invitation.id)
       .then((res) => {
         queryClient.invalidateQueries([INVITATIONS_QUERY_KEY])
 
@@ -64,7 +61,7 @@ const RevokeInvitation = (props: {
       })
       .catch(error.handleError)
       .finally(() => setIsLoading(false))
-  }, [props.invitation.id, props.workspaceId])
+  }, [props.invitation.id, currentWorkspace.id])
 
   return (
     <AlertDialog open={isOpen}>
@@ -92,8 +89,10 @@ const RevokeInvitation = (props: {
 }
 
 const Body = (props: Props) => {
+  const { currentWorkspace } = useWorkspace()
+
   const { data, error, isLoading } = useQuery([INVITATIONS_QUERY_KEY], () =>
-    WorkspaceService.listInvitations(props.currentWorkspace.nanoid)
+    WorkspaceService.listInvitations(currentWorkspace.id)
   )
 
   if (isLoading) {
@@ -116,10 +115,9 @@ const Body = (props: Props) => {
                 className="flex flex-row items-center justify-between shadow-sm p-3 rounded"
               >
                 <p>{invitation.email}</p>
-                <RevokeInvitation
-                  invitation={invitation}
-                  workspaceId={props.currentWorkspace.nanoid}
-                />
+                {currentWorkspace.member.role === 'ADMIN' && (
+                  <RevokeInvitation invitation={invitation} />
+                )}
               </li>
             )
           })}
@@ -130,25 +128,41 @@ const Body = (props: Props) => {
 }
 
 export const ManageInvitationsDialog = (props: Props) => {
+  const inviteMembersDisclosure = useDisclosure()
+
+  const { currentWorkspace } = useWorkspace()
+
   return (
-    <Dialog
-      onOpenChange={(open) => {
-        if (open) {
-          props.onOpen()
-        } else {
-          props.onClose()
-        }
-      }}
-      open={props.isOpen}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="font-roboto">Invitations</DialogTitle>
-          <DialogDescription>
-            <Body {...props} />
-          </DialogDescription>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog
+        onOpenChange={(open) => {
+          if (open) {
+            props.onOpen()
+          } else {
+            props.onClose()
+          }
+        }}
+        open={props.isOpen}
+      >
+        <DialogContent className="p-8">
+          <DialogHeader>
+            <DialogTitle className="font-roboto">
+              <div className="flex flex-row items-center justify-between">
+                <p>Invitations</p>
+                {currentWorkspace.member.role === 'ADMIN' && (
+                  <Button onClick={inviteMembersDisclosure.onOpen}>
+                    Invite New Members
+                  </Button>
+                )}
+              </div>
+            </DialogTitle>
+            <DialogDescription>
+              <Body {...props} />
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+      <InviteWorkspaceDialog {...inviteMembersDisclosure} />
+    </>
   )
 }

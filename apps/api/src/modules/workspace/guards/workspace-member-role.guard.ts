@@ -10,7 +10,7 @@ import { Member, MemberRole } from 'database'
 import { Request } from 'express'
 import { AppError } from 'src/common/error'
 import { ROLES_ALLOWED_METADATA_KEY } from '../decorators/roles-allowed.decorator'
-import { WORKSPACE_MEMBER_REQUEST_KEY } from './workspace.guard'
+import { MEMBER_REQUEST_KEY } from './member.guard'
 
 export const WORKSPACE_REQUEST_KEY = 'workspace'
 
@@ -21,7 +21,7 @@ export class WorkspaceMemberRoleGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest()
 
-    const member: Member = request[WORKSPACE_MEMBER_REQUEST_KEY]
+    const member: Member = request[MEMBER_REQUEST_KEY]
 
     const rolesAllowed = this.reflector.get<MemberRole[]>(
       ROLES_ALLOWED_METADATA_KEY,

@@ -37,7 +37,6 @@ export class UserGuard implements CanActivate {
     try {
       claims = this.jwtService.verify(token)
     } catch (err) {
-      console.log('err', err)
       this.throwUnauthorized()
     }
 

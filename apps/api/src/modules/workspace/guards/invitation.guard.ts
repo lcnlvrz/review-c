@@ -13,8 +13,15 @@ import { Request } from 'express'
 import { AppError } from 'src/common/error'
 import { DatabaseService } from 'src/modules/database/database.service'
 import { InvitationParamDTO } from '../dtos/invitation-param.dto'
-import { INVITATION_REQUEST_KEY } from './workspace-invitation-token.guard'
 import { WORKSPACE_REQUEST_KEY } from './workspace-member-role.guard'
+
+export const INVITATION_REQUEST_KEY = 'invitation'
+
+export const INVITATION_NOT_FOUND_ERR = new AppError({
+  code: 'not_found_invitation',
+  description: `Workspace not found`,
+  status: HttpStatus.NOT_FOUND,
+})
 
 @Injectable()
 export class InvitationGuard implements CanActivate {
@@ -22,8 +29,6 @@ export class InvitationGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest()
-
-    console.log('params', request.params)
 
     const dto = plainToInstance(InvitationParamDTO, request.params)
 
@@ -43,13 +48,7 @@ export class InvitationGuard implements CanActivate {
     })
 
     if (!invitation) {
-      throw new NotFoundException(
-        new AppError({
-          code: 'not_found_invitation',
-          description: `Workspace not found`,
-          status: HttpStatus.NOT_FOUND,
-        })
-      )
+      throw new NotFoundException(INVITATION_NOT_FOUND_ERR)
     }
 
     request[INVITATION_REQUEST_KEY] = invitation
