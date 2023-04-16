@@ -1,0 +1,2 @@
+//20 mb
+export const MAX_FILE_SIZE_IN_BYTES = 20000000
