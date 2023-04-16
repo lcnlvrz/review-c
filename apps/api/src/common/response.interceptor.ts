@@ -5,7 +5,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common'
-import { map } from 'rxjs'
+import { map, catchError } from 'rxjs'
 import { AppError } from './error'
 
 @Injectable()
@@ -18,6 +18,13 @@ export class ResponseInterceptor implements NestInterceptor {
         }
 
         return data
+      }),
+      catchError((data) => {
+        if (data instanceof AppError) {
+          throw new HttpException(data, data.status)
+        }
+
+        throw data
       })
     )
   }

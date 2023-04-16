@@ -1,11 +1,11 @@
-import { Button } from '@/components/Button'
 import { CreateReview } from '@/components/CreateReview'
 import { DashboardLayout } from '@/components/DashboardLayout'
-import { compose, COMPOSE_DEFAULT_MODE, InferCompose } from '@/ssr/compose'
+import { ReviewsList } from '@/components/ReviewsList'
+import { compose, InferCompose } from '@/ssr/compose'
 import { withAuth } from '@/ssr/withAuth'
 import { withCurrentWorkspace } from '@/ssr/withCurrentWorkspace'
+import { withReviews } from '@/ssr/withReviews'
 import { withWorkspaces } from '@/ssr/withWorkspaces'
-import { Plus } from 'lucide-react'
 
 const workspace = (props: InferCompose<typeof getServerSideProps>) => {
   return (
@@ -15,16 +15,18 @@ const workspace = (props: InferCompose<typeof getServerSideProps>) => {
           <h2 className="font-bold text-2xl">Reviews</h2>
           <CreateReview />
         </div>
+        <ReviewsList reviews={props.reviews} />
       </div>
     </DashboardLayout>
   )
 }
 
 export const getServerSideProps = compose(
-  COMPOSE_DEFAULT_MODE,
+  'sequential',
   withAuth(),
   withWorkspaces,
-  withCurrentWorkspace
+  withCurrentWorkspace,
+  withReviews
 )
 
 export default workspace

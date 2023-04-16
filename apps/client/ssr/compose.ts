@@ -1,9 +1,31 @@
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import type { withCurrentWorkspace } from './withCurrentWorkspace'
+import get from 'lodash.get'
 
-export type SSFunction<O extends object = object> = (
+export interface PagePropsMergedMap {
+  currentWorkspace: Awaited<
+    ReturnTypeSSFunction<typeof withCurrentWorkspace>['props']
+  >['currentWorkspace']
+}
+
+export const getPagePropsTypeSafety = <
+  T extends keyof PagePropsMergedMap = keyof PagePropsMergedMap
+>(
+  pageProps: unknown,
+  path: T
+): PagePropsMergedMap[T] => {
+  return get(pageProps, `props.${path}`) as any as PagePropsMergedMap[T]
+}
+
+export type SSFunction<O extends Record<string, any> = Record<string, any>> = (
   ctx: GetServerSidePropsContext,
-  cookie?: string
+  cookie?: string,
+  pageProps?: unknown
 ) => Promise<GetServerSidePropsResult<O>>
+
+export type ReturnTypeSSFunction<T extends SSFunction> = Awaited<
+  UnionToIntersection<Awaited<ReturnType<T>>>
+>
 
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
   k: infer I
@@ -51,10 +73,14 @@ export function compose(
     }
 
     const sequential = async () => {
-      const results: GetServerSidePropsResult<object>[] = []
+      const results: GetServerSidePropsResult<Record<string, unknown>>[] = []
 
       for (const fn of ssf) {
-        const intermediateResult = await fn(ctx, ctx.req.headers.cookie || '')
+        const intermediateResult = await fn(
+          ctx,
+          ctx.req.headers.cookie || '',
+          reducePageProps(results)
+        )
 
         if ('redirect' in intermediateResult) {
           return intermediateResult
@@ -87,5 +113,21 @@ export function compose(
       default:
         return await sequential()
     }
+  }
+}
+
+function reducePageProps(
+  results: GetServerSidePropsResult<Record<string, unknown>>[]
+) {
+  const props = results.map((r) => {
+    if ('props' in r) {
+      return r.props
+    }
+
+    return {}
+  })
+
+  return {
+    props: props.reduce((prev, curr) => ({ ...prev, ...curr }), {}),
   }
 }

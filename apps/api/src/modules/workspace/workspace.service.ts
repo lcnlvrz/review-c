@@ -43,7 +43,7 @@ export class WorkspaceService {
         description: input.dto.description,
         members: {
           create: {
-            role: MemberRole.OWNER,
+            role: MemberRole.ADMIN,
             userId: input.user.id,
           },
         },

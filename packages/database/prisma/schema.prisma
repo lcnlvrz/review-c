@@ -21,6 +21,7 @@ model User {
   Memberships       Member[]
   Workspace         Workspace[]
   Invitation        Invitation[]
+  ReviewUser        ReviewUser[]
 }
 
 model IdentityProvider {
@@ -74,8 +75,59 @@ model Workspace {
   User        User?        @relation(fields: [userId], references: [id])
   userId      Int?
   invitations Invitation[]
+  Review      Review[]
 
   @@index([userId])
+}
+
+model File {
+  id               Int      @id @default(autoincrement())
+  storedKey        String
+  originalFilename String
+  size             Int
+  createdAt        DateTime @default(now())
+  Review           Review[]
+}
+
+enum ReviewUserRole {
+  OWNER
+  REVIEWER
+  VIEWER
+}
+
+model ReviewUser {
+  id          Int            @id @default(autoincrement())
+  user        User           @relation(fields: [userId], references: [id])
+  userId      Int
+  role        ReviewUserRole
+  inviteToken String?
+  inviteEmail String?
+  Review      Review?        @relation(fields: [reviewId], references: [id])
+  reviewId    String?
+
+  @@index([userId])
+  @@index([reviewId])
+}
+
+model Review {
+  id          String       @id
+  type        ReviewType
+  token       String
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  url         String?
+  file        File?        @relation(fields: [fileId], references: [id])
+  fileId      Int?
+  users       ReviewUser[]
+  createdAt   DateTime     @default(now())
+
+  @@index([fileId])
+  @@index([workspaceId])
+}
+
+enum ReviewType {
+  FILE
+  URL
 }
 
 enum Provider {

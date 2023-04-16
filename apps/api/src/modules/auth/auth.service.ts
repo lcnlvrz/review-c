@@ -81,7 +81,7 @@ export class AuthService {
             members: {
               create: {
                 userId: user.id,
-                role: MemberRole.OWNER,
+                role: MemberRole.ADMIN,
               },
             },
           },

@@ -14,3 +14,30 @@ services:
       test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       timeout: 20s
       retries: 10
+
+  minio:
+    container_name: minio-tst
+    image: minio/minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio_storage:/data
+    environment:
+      MINIO_ACCESS_KEY: xWWXcCdvyNLlHGt2cwyC
+      MINIO_SECRET_KEY: SZ69UCZBC5ycyV356Nv0
+    command: server --console-address ":9001" /data
+
+  createbuckets:
+    container_name: createbuckets-tst
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio-tst:9000 xWWXcCdvyNLlHGt2cwyC SZ69UCZBC5ycyV356Nv0;
+      /usr/bin/mc rm -r --force myminio/review-c;
+      /usr/bin/mc mb myminio/review-c;
+      /usr/bin/mc policy download myminio/review-c;
+      exit 0;
+      "
