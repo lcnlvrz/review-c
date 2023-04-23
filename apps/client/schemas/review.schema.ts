@@ -1,37 +1,27 @@
 import { reviewTypes } from '@/constants/review'
 import { z } from 'zod'
 
-export const reviewSchema = z
-  .object({
-    type: z.enum(reviewTypes),
-    url: z.string().url().optional().nullable(),
-    file: z.string().optional().nullable(),
-  })
-  .refine(
-    (data) => {
-      if (data.type !== 'FILE') {
-        return true
-      }
+const props = {
+  title: z.string().min(1, { message: 'Title is required' }),
+}
 
-      return !!data.file
-    },
-    {
-      path: ['file'],
-      message: 'File is required',
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.type !== 'URL') {
-        return true
-      }
+const typeEnum = z.enum(reviewTypes)
 
-      return !!data.url
-    },
-    {
-      path: ['url'],
-      message: 'URL is required',
-    }
-  )
+const fileSchema = z.object({
+  title: props.title,
+  type: z.literal(typeEnum.enum.FILE),
+  file: z.string(),
+})
+
+const urlSchema = z.object({
+  title: props.title,
+  type: z.literal(typeEnum.enum.URL),
+  url: z.string().url(),
+})
+
+export const reviewSchema = z.discriminatedUnion('type', [
+  fileSchema,
+  urlSchema,
+])
 
 export type ReviewSchema = z.infer<typeof reviewSchema>

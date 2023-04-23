@@ -112,6 +112,7 @@ model ReviewUser {
 model Review {
   id          String       @id
   type        ReviewType
+  title       String
   token       String
   workspace   Workspace    @relation(fields: [workspaceId], references: [id])
   workspaceId String

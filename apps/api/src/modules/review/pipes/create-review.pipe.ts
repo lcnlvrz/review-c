@@ -22,6 +22,7 @@ import { HttpService } from '@nestjs/axios'
 
 export type CreateReviewPipeOutput =
   | {
+      title: string
       type: 'FILE'
       file: {
         claims: PresignedFilePostTokenClaimsDTO
@@ -29,6 +30,7 @@ export type CreateReviewPipeOutput =
       }
     }
   | {
+      title: string
       type: 'URL'
       url: string
     }
@@ -71,10 +73,7 @@ export class CreateReviewPipe implements PipeTransform {
           throw this.unauthorizedFileToken()
         }
 
-        console.log('claims.keyStored', claims.keyStored)
-
         const objectMetadata = await this.s3.getMetadataObject(claims.keyStored)
-        console.log('objectMetadata', objectMetadata)
 
         if (!objectMetadata.exists) {
           throw new AppError({
@@ -85,6 +84,7 @@ export class CreateReviewPipe implements PipeTransform {
         }
 
         return {
+          title: dto.title,
           type: 'FILE',
           file: {
             claims,
@@ -105,6 +105,7 @@ export class CreateReviewPipe implements PipeTransform {
         }
 
         return {
+          title: dto.title,
           type: 'URL',
           url: dto.url,
         }

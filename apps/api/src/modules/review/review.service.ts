@@ -51,6 +51,7 @@ export class ReviewService {
 
       const review = await trx.review.create({
         data: {
+          title: input.title,
           workspaceId: workspace.id,
           id: nanoid.nanoid(),
           fileId: fields.fileId,

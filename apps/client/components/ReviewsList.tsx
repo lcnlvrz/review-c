@@ -21,7 +21,17 @@ export const ReviewsList = (props: {
     }
   )
 
-  console.log('data', data)
-
-  return <div>ReviewsList</div>
+  return (
+    <div className="flex flex-col space-y-5 mt-5">
+      <div className="flex flex-col space-y-5">
+        {data.map((review) => {
+          return (
+            <div className="border border-gray-300 p-3 rounded-lg">
+              <p>{review.title}</p>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }

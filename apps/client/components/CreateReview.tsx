@@ -77,44 +77,56 @@ const Body = (props: { onClose: () => void }) => {
     [workspace.id]
   )
 
-  console.log('methods', methods.formState.errors)
+  console.log('methods.formState.errors', methods.formState.errors)
+  console.log('fields', fields)
 
   return (
     <form onSubmit={methods.handleSubmit(onCreateReview)}>
       <div className="max-w-sm flex flex-col space-y-5">
-        <div>
-          <Select
-            value={fields.type}
-            onValueChange={(value) =>
-              methods.setValue('type', value as ReviewType)
-            }
-          >
-            <SelectTrigger className="m-0">
-              <SelectValue placeholder="Select a type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {reviewTypesOpts.map(({ label, type, context }) => {
-                  return (
-                    <SelectItem key={type} value={type}>
-                      <span className="flex flex-col item-start justify-start text-start">
-                        {label}
-                        <span className="text-xs text-gray-600">{context}</span>
-                      </span>
-                    </SelectItem>
-                  )
-                })}
-              </SelectGroup>
-              <SelectSeparator />
-            </SelectContent>
-          </Select>
-
-          {methods.formState.errors.type && (
+        <div className="grid w-full max-w-sm items-center gap-1.5">
+          <Label>Title</Label>
+          <Input
+            type="text"
+            placeholder="Review"
+            {...methods.register('title')}
+          />
+          {methods.formState.errors.title && (
             <TextErrorMessage>
-              {methods.formState.errors.type.message}
+              {methods.formState.errors.title.message}
             </TextErrorMessage>
           )}
         </div>
+        <Select
+          value={fields.type}
+          onValueChange={(value) =>
+            methods.setValue('type', value as ReviewType)
+          }
+        >
+          <SelectTrigger className="m-0">
+            <SelectValue placeholder="Select a type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {reviewTypesOpts.map(({ label, type, context }) => {
+                return (
+                  <SelectItem key={type} value={type}>
+                    <span className="flex flex-col item-start justify-start text-start">
+                      {label}
+                      <span className="text-xs text-gray-600">{context}</span>
+                    </span>
+                  </SelectItem>
+                )
+              })}
+            </SelectGroup>
+            <SelectSeparator />
+          </SelectContent>
+        </Select>
+
+        {methods.formState.errors.type && (
+          <TextErrorMessage>
+            {methods.formState.errors.type.message}
+          </TextErrorMessage>
+        )}
 
         {fields.type === 'URL' && (
           <div>
@@ -123,7 +135,8 @@ const Body = (props: { onClose: () => void }) => {
               placeholder="https://example.com"
               {...methods.register('url')}
             />
-            {methods.formState.errors.url ? (
+            {'url' in methods.formState.errors &&
+            methods.formState.errors.url ? (
               <TextErrorMessage>
                 {methods.formState.errors.url.message}
               </TextErrorMessage>
@@ -136,9 +149,17 @@ const Body = (props: { onClose: () => void }) => {
         )}
 
         {fields.type === 'FILE' && (
-          <UploadFile
-            onUploadedFile={(token) => methods.setValue('file', token)}
-          />
+          <>
+            <UploadFile
+              onUploadedFile={(token) => methods.setValue('file', token)}
+            />
+            {'file' in methods.formState.errors &&
+              methods.formState.errors.file && (
+                <TextErrorMessage>
+                  {methods.formState.errors.file.message}
+                </TextErrorMessage>
+              )}
+          </>
         )}
       </div>
 
