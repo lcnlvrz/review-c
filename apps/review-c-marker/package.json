@@ -22,7 +22,10 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwind-merge": "^1.12.0",
-    "tailwindcss-animate": "^1.0.5"
+    "tailwindcss-animate": "^1.0.5",
+    "ui": "*",
+    "db": "*",
+    "clients": "*"
   },
   "devDependencies": {
     "@plasmohq/prettier-plugin-sort-imports": "3.6.4",
@@ -36,6 +39,16 @@
   "manifest": {
     "host_permissions": [
       "https://*/*"
-    ]
+    ],
+    "permissions": [
+      "storage",
+      "identity"
+    ],
+    "oauth2": {
+      "client_id": "$PLASMO_PUBLIC_GOOGLE_CLIENT_ID",
+      "scopes": [
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    }
   }
 }

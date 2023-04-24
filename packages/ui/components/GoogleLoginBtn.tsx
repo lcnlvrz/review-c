@@ -1,24 +1,7 @@
-import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google'
-
-export type AuthProviders = 'GOOGLE' | 'FACEBOOK'
-
-interface Props {
-  onConsent: (token: string, provider: AuthProviders) => void
-}
-
-const GoogleAuth = (props: Props) => {
-  const googleLogin = useGoogleLogin({
-    flow: 'implicit',
-    onSuccess: (credentialResponse) => {
-      if (credentialResponse.access_token) {
-        props.onConsent(credentialResponse.access_token, 'GOOGLE')
-      }
-    },
-  })
-
+export const GoogleLoginBtn = (props: { onClick: () => void }) => {
   return (
     <button
-      onClick={() => googleLogin()}
+      onClick={props.onClick}
       className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow flex items-center"
     >
       <svg
@@ -38,15 +21,5 @@ const GoogleAuth = (props: Props) => {
       </svg>
       Sign in with Google
     </button>
-  )
-}
-
-export const GoogleLoginBtn = (props: Props) => {
-  return (
-    <GoogleOAuthProvider
-      clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string}
-    >
-      <GoogleAuth {...props} />
-    </GoogleOAuthProvider>
   )
 }

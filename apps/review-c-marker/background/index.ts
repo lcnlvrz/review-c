@@ -1,7 +1,9 @@
-import { Storage } from "@plasmohq/storage"
+import { Storage } from '@plasmohq/storage'
+
+export const storage = new Storage()
 
 const main = async () => {
-  const storage = new Storage()
+  await storage.clear()
 }
 
 main()

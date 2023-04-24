@@ -54,6 +54,7 @@ export class AuthController {
 
     return res.status(HttpStatus.OK).json({
       userId: signIn.userId,
+      access_token:token
     })
   }
 
