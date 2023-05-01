@@ -2,6 +2,7 @@ import { MessageCircle, Plus, Send } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { getXPath } from '~lib/get-xpath'
 import { cn } from '~lib/utils'
+import { useReview } from '~providers/ReviewProvider'
 
 interface MarkerPoint {
   xpath: string
@@ -21,7 +22,7 @@ const Point = (props: { left: number; top: number }) => {
         className={cn(`absolute`)}
       >
         <div className="bg-white p-2 rounded-full shadow-lg border-gray-400 border">
-          <MessageCircle className="-scale-x-1" />
+          <MessageCircle className="-scale-x-1 text-primary" />
         </div>
       </div>
     </>
@@ -32,6 +33,7 @@ const CommitPointListener = (props: {
   stagedPoint?: MarkerPoint
   setStagedPoint: (point: MarkerPoint) => void
 }) => {
+  const ctx = useReview()
   const ref = useRef<HTMLDivElement>()
 
   const elementsOverlap = useCallback((a: HTMLElement, b: HTMLElement) => {
@@ -79,6 +81,7 @@ const CommitPointListener = (props: {
     }
 
     props.setStagedPoint(point)
+    ctx.blurCursor()
   }, [])
 
   useEffect(() => {
@@ -89,39 +92,37 @@ const CommitPointListener = (props: {
     }
   }, [props.stagedPoint])
 
-  if (props.stagedPoint) {
-    return (
-      <div>
-        <Point left={props.stagedPoint.left} top={props.stagedPoint.top} />
-        <div
-          ref={ref}
-          style={{
-            transform: `translate(${props.stagedPoint.left + 45}px, ${
-              props.stagedPoint.top
-            }px)`,
-          }}
-          className={cn(
-            `absolute bg-white p-3 border-gray-400 min-w-full max-w-[20rem] border shadow-lg rounded-2xl`
-          )}
-        >
-          <textarea className="border-none focus:outline-0 text-sm focus:ring-0 focus:border-transparent resize-none" />
-          <div className="w-full flex justify-between">
-            <button className="hover:bg-gray-500 rounded-full transition-all">
-              <Plus className="text-gray-300 w-[20px] text-xs" />
-            </button>
-            <button className="hover:bg-gray-500 rounded-full transition-all bg-primary">
-              <Send className="text-gray-300 w-[20px] text-xs" />
-            </button>
-          </div>
+  if (!props.stagedPoint) return null
+
+  return (
+    <div>
+      <Point left={props.stagedPoint.left} top={props.stagedPoint.top} />
+      <div
+        ref={ref}
+        style={{
+          transform: `translate(${props.stagedPoint.left + 45}px, ${
+            props.stagedPoint.top
+          }px)`,
+        }}
+        className={cn(
+          `absolute bg-white p-3 border-gray-400 min-w-full max-w-[20rem] border shadow-lg rounded-2xl`
+        )}
+      >
+        <textarea className="border-none p-3 bg-white text-black focus:outline-0 text-sm focus:ring-0 focus:border-transparent resize-none" />
+        <div className="w-full flex justify-between">
+          <button className="hover:bg-primary group rounded-full p-1 transition-all">
+            <Plus className="text-gray-500 group-hover:text-white w-[20px] text-xs" />
+          </button>
+          <button className="hover:bg-primary rounded-full group p-1 transition-all ">
+            <Send className="text-gray-500 w-[20px] text-xs group-hover:text-white" />
+          </button>
         </div>
       </div>
-    )
-  }
-
-  return null
+    </div>
+  )
 }
 
-export const Points = (props: { isCursorFocused: boolean }) => {
+export const Points = () => {
   const [committedPoints, setCommittedPoints] = useState<MarkerPoint[]>([])
   const [stagedPoint, setStagedPoint] = useState<MarkerPoint>()
 
@@ -137,8 +138,6 @@ export const Points = (props: { isCursorFocused: boolean }) => {
       console.log('not found node')
       return point
     }
-
-    console.log('found node, calculating...')
 
     const rect = (node.singleNodeValue as HTMLElement).getBoundingClientRect()
 
@@ -179,12 +178,11 @@ export const Points = (props: { isCursorFocused: boolean }) => {
 
   return (
     <div>
-      {props.isCursorFocused && (
-        <CommitPointListener
-          stagedPoint={stagedPoint}
-          setStagedPoint={(point) => setStagedPoint(point)}
-        />
-      )}
+      <CommitPointListener
+        stagedPoint={stagedPoint}
+        setStagedPoint={(point) => setStagedPoint(point)}
+      />
+
       {committedPoints.map((p, index) => (
         <Point key={index} {...p} />
       ))}

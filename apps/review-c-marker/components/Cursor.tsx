@@ -1,4 +1,4 @@
-import cursor from 'data-base64:~assets/icon.png'
+import { Plus } from 'lucide-react'
 
 export const Cursor = (props: { x: number; y: number }) => {
   return (
@@ -10,7 +10,9 @@ export const Cursor = (props: { x: number; y: number }) => {
         }}
         className="fixed"
       >
-        <img className="w-[30px] h-[30px]" src={cursor} />
+        <div className="p-1 bg-primary rounded-full">
+          <Plus className="m-0 p-0 w-[20px] h-[20px] text-white fill-white" />
+        </div>
       </div>
     </div>
   )

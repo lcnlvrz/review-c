@@ -1,11 +1,11 @@
-import cssText from "data-text:~styles.css"
-
-import { ReviewToolkit } from "~components/ReviewToolkit"
-import { WaitForHost } from "~components/WaitForHost"
-import { useIsReviewing } from "~hooks/useIsReviewing"
+import cssText from 'data-text:~styles.css'
+import { ReviewToolkit } from '~components/ReviewToolkit'
+import { WaitForHost } from '~components/WaitForHost'
+import { useIsReviewing } from '~hooks/useIsReviewing'
+import { ReviewProvider } from '~providers/ReviewProvider'
 
 export const getStyle = () => {
-  const style = document.createElement("style")
+  const style = document.createElement('style')
   style.textContent = cssText
   return style
 }
@@ -17,7 +17,11 @@ const Layout = (props: { host: string }) => {
     return null
   }
 
-  return <ReviewToolkit />
+  return (
+    <ReviewProvider>
+      <ReviewToolkit />
+    </ReviewProvider>
+  )
 }
 
 const content = () => {
