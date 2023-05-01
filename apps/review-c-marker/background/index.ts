@@ -2,8 +2,6 @@ import { Storage } from '@plasmohq/storage'
 
 export const storage = new Storage()
 
-const main = async () => {
-  await storage.clear()
-}
+const main = async () => {}
 
 main()

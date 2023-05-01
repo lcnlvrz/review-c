@@ -7,6 +7,9 @@ import './styles.css'
 
 const ToggleReview = (props: { host: string }) => {
   const { isReviewing, toggleReview } = useIsReviewing(props.host)
+
+  console.log('isReviewing', isReviewing)
+
   const { auth, requestSignIn, setAuth } = useAuth()
 
   return (
