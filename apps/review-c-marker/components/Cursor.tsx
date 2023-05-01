@@ -28,6 +28,7 @@ export const Cursor = () => {
 
   const handleMouseClick = useCallback((event: MouseEvent) => {
     event.stopPropagation()
+
     const target = event.target as HTMLElement
 
     const path = getXPath(target)
@@ -58,6 +59,11 @@ export const Cursor = () => {
           XPathResult.FIRST_ORDERED_NODE_TYPE
         )
 
+        if (!node.singleNodeValue) {
+          console.log('not found node')
+          return p
+        }
+
         const rect = (
           node.singleNodeValue as HTMLElement
         ).getBoundingClientRect()
@@ -78,6 +84,7 @@ export const Cursor = () => {
   }, [points])
 
   useEffect(() => {
+    window.addEventListener('scroll', recalculatePoints)
     window.addEventListener('resize', recalculatePoints)
     window.addEventListener('click', handleMouseClick)
     window.addEventListener('mousemove', handleMouseMove)
@@ -86,6 +93,7 @@ export const Cursor = () => {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('click', handleMouseClick)
       window.removeEventListener('resize', recalculatePoints)
+      window.removeEventListener('scroll', recalculatePoints)
     }
   }, [])
 
@@ -109,12 +117,12 @@ export const Cursor = () => {
               key={index}
               style={{
                 position: 'absolute',
-                top: p.top,
-                left: p.left,
+                transform: `translate(${p.left}px, ${p.top}px)`,
+                width: '30px',
+                height: '30px',
               }}
             >
-              <p>text goes here!</p>
-              {/* <img src={cursor} className="w-[30px] h-[30px]" /> */}
+              <img src={cursor} />
             </div>
           )
         })}
