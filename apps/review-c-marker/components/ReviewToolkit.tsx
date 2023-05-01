@@ -1,11 +1,12 @@
 import { Cursor } from './Cursor'
+import { Points } from './Points'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from './Tooltip'
-import cursor from 'data-base64:~assets/icon.png'
+import { Portal } from '@radix-ui/react-tooltip'
 import { Inbox, MessageCircle } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDisclosure } from '~hooks/useDisclosure'
@@ -15,10 +16,36 @@ export const ReviewToolkit = () => {
   const ref = useRef<HTMLDivElement>()
 
   const isCursorFocused = useDisclosure()
+  const [cursor, setCursor] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  })
 
-  const onClickAnchor = useCallback(() => {
-    return false
+  const handleMouseMove = useCallback((event: MouseEvent) => {
+    setCursor({
+      x: event.clientX,
+      y: event.clientY,
+    })
   }, [])
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+    }
+  }, [])
+
+  const iterateOverSelectableElements = useCallback(
+    (pointerEvents: 'auto' | 'none') => {
+      ;(['a', 'iframe'] as const).forEach((tagname) => {
+        window.document.querySelectorAll(tagname).forEach((ele) => {
+          ele.style.pointerEvents = pointerEvents
+        })
+      })
+    },
+    []
+  )
 
   const onToggleComment = useCallback(
     (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -29,9 +56,7 @@ export const ReviewToolkit = () => {
         isCursorFocused.onClose()
         html.style.cursor = 'auto'
         html.style.userSelect = 'auto'
-        window.document.querySelectorAll('a').forEach((htmlEle) => {
-          htmlEle.style.pointerEvents = 'auto'
-        })
+        iterateOverSelectableElements('auto')
       }
 
       if (!isCursorFocused.isOpen) {
@@ -39,17 +64,20 @@ export const ReviewToolkit = () => {
 
         html.style.cursor = 'none'
         html.style.userSelect = 'none'
-        window.document.querySelectorAll('a').forEach((htmlEle) => {
-          htmlEle.style.pointerEvents = 'none'
-        })
+        iterateOverSelectableElements('none')
       }
     },
     [isCursorFocused.isOpen]
   )
 
   return (
-    <div>
-      {isCursorFocused.isOpen && <Cursor />}
+    <div
+      onClick={(e) => {
+        e.stopPropagation()
+      }}
+    >
+      <Points isCursorFocused={isCursorFocused.isOpen} />
+      {isCursorFocused.isOpen && <Cursor x={cursor.x} y={cursor.y} />}
 
       <div ref={ref} className="fixed bottom-0 p-3 right-[50%] left-[50%]">
         <div className="flex items-center justify-center">
