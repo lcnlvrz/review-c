@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRowSelect } from 'react-table'
 import { createContext } from 'vm'
+import { FileClient } from '~../../packages/clients'
 import { useAuth } from '~hooks/useAuth'
 import { useDisclosure } from '~hooks/useDisclosure'
 import { fileToBase64 } from '~lib/file-to-base64'
@@ -159,6 +160,13 @@ const CommitPoint = (props: { stagedPoint?: MarkerPoint }) => {
     isTakingScreenshotCtrl.onOpen()
   }, [])
 
+  const onScreenshotTaken = useCallback((file: File) => {
+    FileClient.presignedPostURL({
+      filename: file.name,
+      mimetype: file.type,
+    }).then((res) => {})
+  }, [])
+
   return (
     <div>
       {ctx.mustShowAbsoluteElements && (
@@ -208,15 +216,7 @@ const CommitPoint = (props: { stagedPoint?: MarkerPoint }) => {
       )}
 
       {isTakingScreenshotCtrl.isOpen && (
-        <InspectElements
-          onScreenshotTaken={(file) => {
-            fileToBase64(file)
-              .then(setScreenshot)
-              .finally(() => {
-                isTakingScreenshotCtrl.onClose()
-              })
-          }}
-        />
+        <InspectElements onScreenshotTaken={onScreenshotTaken} />
       )}
 
       {screenshot && (

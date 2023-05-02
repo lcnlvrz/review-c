@@ -21,8 +21,13 @@ type FetchError<T = unknown> = {
   headers: Headers
 }
 
-class HttpClient {
-  constructor(private baseUrl: string) {}
+export class HttpClient {
+  constructor(
+    private baseUrl: string,
+    private readonly headers: {
+      [k: string]: string
+    } = {}
+  ) {}
 
   private async request<T>(
     path: string,
@@ -34,12 +39,11 @@ class HttpClient {
       method: options.method,
       headers: {
         ...options.headers,
+        ...this.headers,
         'Content-Type': 'application/json',
       },
       body: options.body,
     })
-
-    console.log('response.ok', response.ok)
 
     if (!response.ok) {
       const error: FetchError = {
