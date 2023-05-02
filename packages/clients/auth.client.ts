@@ -14,7 +14,7 @@ export class AuthClient {
 
   public static fetchMe(token?: string) {
     return httpClient
-      .get<User>('/auth/sign-in', {
+      .get<User>('/auth/me', {
         Cookie: `review-c_session=${token}`,
       })
       .then((res) => res.data)

@@ -18,7 +18,7 @@ model User {
   lastName          String
   avatar            String             @db.Text
   identityProviders IdentityProvider[]
-  Memberships       Member[]
+  memberships       Member[]
   Workspace         Workspace[]
   Invitation        Invitation[]
   ReviewUser        ReviewUser[]

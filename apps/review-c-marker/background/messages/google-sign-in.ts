@@ -16,18 +16,21 @@ const handler: PlasmoMessaging.Handler<
   const token = await getGoogleToken()
 
   try {
-    const auth = await AuthClient.signIn({
+    const { access_token } = await AuthClient.signIn({
       provider: 'GOOGLE',
       token,
     })
 
+    const auth = await AuthClient.fetchMe(token)
+
     storage.set('auth', auth)
-    storage.set('access_token', token)
+    storage.set('access_token', access_token)
 
     response.send({
       success: true,
     })
   } catch (err) {
+    console.log(err)
     response.send({
       success: false,
     })

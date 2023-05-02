@@ -11,21 +11,25 @@
     "package": "plasmo package"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.1.0",
     "@plasmohq/messaging": "^0.1.8",
     "@plasmohq/storage": "^1.5.0",
     "@radix-ui/react-avatar": "^1.0.2",
     "@radix-ui/react-tooltip": "^1.0.5",
     "class-variance-authority": "^0.5.2",
+    "clients": "*",
     "clsx": "^1.2.1",
+    "db": "*",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.162.0",
     "plasmo": "0.68.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.43.9",
     "tailwind-merge": "^1.12.0",
     "tailwindcss-animate": "^1.0.5",
     "ui": "*",
-    "db": "*",
-    "clients": "*"
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@plasmohq/prettier-plugin-sort-imports": "3.6.4",

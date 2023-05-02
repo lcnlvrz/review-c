@@ -1,12 +1,34 @@
 import { Plus } from 'lucide-react'
+import React from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-export const Cursor = (props: { x: number; y: number }) => {
+export const Cursor = () => {
+  const [cursor, setCursor] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  })
+
+  const handleMouseMove = useCallback((event: MouseEvent) => {
+    setCursor({
+      x: event.clientX,
+      y: event.clientY,
+    })
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+    }
+  }, [])
+
   return (
     <div>
       <div
         style={{
           pointerEvents: 'none',
-          transform: `translate(${props.x}px, ${props.y}px)`,
+          transform: `translate(${cursor.x}px, ${cursor.y}px)`,
         }}
         className="fixed"
       >

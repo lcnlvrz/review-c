@@ -6,7 +6,8 @@ const iterateElement = (element: HTMLElement): string => {
   if (element === document.body) return element.tagName.toLowerCase()
 
   var ix = 0
-  const siblings = element.parentNode.childNodes
+  const siblings = element.parentNode?.childNodes || []
+
   for (var i = 0; i < siblings.length; i++) {
     var sibling = siblings[i]
 

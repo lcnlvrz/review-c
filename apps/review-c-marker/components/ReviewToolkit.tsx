@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from './Tooltip'
 import { MessageCircle } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { cn } from '~lib/utils'
 import { useReview } from '~providers/ReviewProvider'
 
@@ -16,26 +16,6 @@ export const ReviewToolkit = () => {
 
   const ctx = useReview()
 
-  const [cursor, setCursor] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  })
-
-  const handleMouseMove = useCallback((event: MouseEvent) => {
-    setCursor({
-      x: event.clientX,
-      y: event.clientY,
-    })
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove)
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-    }
-  }, [])
-
   return (
     <div
       onClick={(e) => {
@@ -43,7 +23,7 @@ export const ReviewToolkit = () => {
       }}
     >
       <Points />
-      {ctx.cursorFocused && <Cursor x={cursor.x} y={cursor.y} />}
+      {ctx.cursorFocused && <Cursor />}
       <div
         ref={ref}
         className="fixed w-[10rem] h-[5rem] bottom-0 p-3 right-[50%] left-[50%]"
