@@ -1,7 +1,5 @@
-import { useCallback, useState } from "react"
-
-import { sendToBackground } from "@plasmohq/messaging"
-import { useStorage } from "@plasmohq/storage/hook"
+import { useStorage } from '@plasmohq/storage/hook'
+import { useCallback } from 'react'
 
 export interface ReviewingState {
   hosts: string[]
@@ -17,6 +15,6 @@ export const useIsReviewing = (host: string) => {
 
   return {
     isReviewing,
-    toggleReview
+    toggleReview,
   }
 }

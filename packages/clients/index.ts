@@ -1,3 +1,5 @@
 export * from './auth.client'
 export * from './file.client'
 export * from './http.client'
+export * from './review.client'
+export * from './workspaces.client'

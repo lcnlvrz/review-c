@@ -131,7 +131,7 @@ export class HttpClient {
     return this.request<T>(path, options)
   }
 }
-
-export const httpClient = new HttpClient(
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || process.env.PLASMO_PUBLIC_API_URL
-)
+
+export const httpClient = new HttpClient(API_BASE_URL)

@@ -10,6 +10,7 @@
   "author": "Luciano Alvarez",
   "license": "ISC",
   "dependencies": {
-    "db": "*"
+    "db": "*",
+    "common": "*"
   }
 }
