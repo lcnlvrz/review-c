@@ -1,11 +1,13 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import { GoogleLoginBtn } from 'ui'
-import { ReviewSelector } from '~components/ReviewSelector'
+import { SignInReviewSession } from '~components/SignInReviewSession'
 import { WaitForHost } from '~components/WaitForHost'
 import { useAuth } from '~hooks/useAuth'
 import './styles.css'
 import { API_BASE_URL, HttpClient } from 'clients'
+import { SignOutReviewSession } from '~components/SignOutReviewSession'
+import { useReviewSession } from '~hooks/useReviewSession'
 import { HTTPClientProvider } from '~providers/HTTPClientProvider'
 
 const Layout = (props: { host: string; token: string }) => {
@@ -15,9 +17,15 @@ const Layout = (props: { host: string; token: string }) => {
     })
   )
 
+  const { currentReviewSession } = useReviewSession(props.host)
+
   return (
     <HTTPClientProvider httpClient={httpClient}>
-      <ReviewSelector host={props.host} />
+      {!currentReviewSession ? (
+        <SignInReviewSession host={props.host} />
+      ) : (
+        <SignOutReviewSession host={props.host} />
+      )}
     </HTTPClientProvider>
   )
 }
