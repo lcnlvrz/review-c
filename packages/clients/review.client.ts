@@ -1,9 +1,7 @@
-import { HttpClient } from './http.client'
+import { Client } from './client'
 import type { ListReviewsOutput } from 'common'
 
-export class ReviewClient {
-  constructor(private readonly httpClient: HttpClient) {}
-
+export class ReviewClient extends Client {
   async listReviews(workspaceId: string) {
     return await this.httpClient
       .get(`/workspace/${workspaceId}/review`)

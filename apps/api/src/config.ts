@@ -1,7 +1,8 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common'
-import * as cookieParser from 'cookie-parser'
 import { ResponseInterceptor } from './common/response.interceptor'
 import { DatabaseService } from './modules/database/database.service'
+import { generateCorsMiddleware } from './utils/generate-cors-middleware'
+import { INestApplication, ValidationPipe } from '@nestjs/common'
+import * as cookieParser from 'cookie-parser'
 
 export const configApp = async (app: INestApplication) => {
   const prismaService = app.get<DatabaseService>(DatabaseService)
@@ -11,4 +12,5 @@ export const configApp = async (app: INestApplication) => {
   app.useGlobalPipes(new ValidationPipe())
 
   app.use(cookieParser())
+  app.use(generateCorsMiddleware(['/file/presigned']))
 }

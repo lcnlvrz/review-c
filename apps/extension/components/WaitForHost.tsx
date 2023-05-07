@@ -1,6 +1,7 @@
-import React from "react"
+import React from 'react'
+import { useHost } from '~hooks/useHost'
 
-import { useHost } from "~hooks/useHost"
+export const PORTAL_ID = 'review-c-portal-id'
 
 export const WaitForHost = (props: {
   children: React.FC<{ host: string }>
@@ -14,8 +15,9 @@ export const WaitForHost = (props: {
   return (
     <>
       {props.children({
-        host
+        host,
       })}
+      <div id={PORTAL_ID} />
     </>
   )
 }

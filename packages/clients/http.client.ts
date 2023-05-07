@@ -3,7 +3,7 @@ type Method = 'GET' | 'POST' | 'PUT' | 'DELETE'
 interface RequestOptions {
   method: Method
   headers?: Record<string, string>
-  body?: string
+  body?: string | FormData
 }
 
 interface FetchResponse<T> {
@@ -35,15 +35,30 @@ export class HttpClient {
   ): Promise<FetchResponse<T>> {
     const url = `${this.baseUrl}${path}`
 
-    const response = await fetch(url, {
+    const params = {
       method: options.method,
       headers: {
         ...options.headers,
         ...this.headers,
-        'Content-Type': 'application/json',
+        ...(options.body instanceof FormData
+          ? {}
+          : { 'Content-Type': 'application/json' }),
       },
       body: options.body,
-    })
+    }
+
+    if (options.body instanceof FormData) {
+      const data = new URLSearchParams()
+
+      for (const pair of options.body.entries()) {
+        const [k, v] = pair
+        data.append(k, v as string)
+      }
+
+      options.body = data
+    }
+
+    const response = await fetch(url, params)
 
     if (!response.ok) {
       const error: FetchError = {
@@ -93,13 +108,13 @@ export class HttpClient {
 
   async post<T>(
     path: string,
-    body?: Record<string, unknown>,
+    body?: Record<string, unknown> | FormData,
     headers?: Record<string, string>
   ): Promise<FetchResponse<T>> {
     const options = {
       method: 'POST',
       headers,
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
     } as const
 
     return this.request<T>(path, options)

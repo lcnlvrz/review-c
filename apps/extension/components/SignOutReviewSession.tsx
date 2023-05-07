@@ -30,7 +30,7 @@ export const SignOutReviewSession = (props: { host: string }) => {
       </div>
       <div className="text-center">
         <button
-          onClick={() => stopReviewSession()}
+          onClick={stopReviewSession}
           className="rounded-3xl bg-red-500 w-full px-6 py-1 text-lg font-medium text-white"
         >
           Stop Review

@@ -15,6 +15,8 @@ const handler: PlasmoMessaging.Handler<
 > = async (_, response) => {
   const token = await getGoogleToken()
 
+  console.log('token', token)
+
   try {
     const { access_token } = await AuthClient.signIn({
       provider: 'GOOGLE',
