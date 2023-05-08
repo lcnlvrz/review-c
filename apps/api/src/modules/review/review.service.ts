@@ -1,15 +1,58 @@
-import { Injectable } from '@nestjs/common'
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util'
-import { CreateReviewOutput, ListReviewsOutput } from 'common'
-import * as crypto from 'crypto'
-import { User, Workspace } from 'database'
 import { DatabaseService } from '../database/database.service'
 import { CreateReviewPipeOutput } from './pipes/create-review.pipe'
+import { StartReviewThreadPipeOutput } from './pipes/start-review-thread.pipe'
+import { Injectable } from '@nestjs/common'
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util'
+import {
+  CreateReviewOutput,
+  ListReviewsOutput,
+  RetrieveReviewDetailOutput,
+} from 'common'
+import * as crypto from 'crypto'
+import { Review, User, Workspace } from 'database'
+
 const nanoid = require('nanoid')
 
 @Injectable()
 export class ReviewService {
   constructor(private readonly dbService: DatabaseService) {}
+
+  async startThread(input: {
+    user: User
+    workspace: Workspace
+    review: Review
+    dto: StartReviewThreadPipeOutput
+  }) {
+    const thread = await this.dbService.thread.create({
+      data: {
+        xPath: input.dto.xPath,
+        xPercentage: input.dto.xPercentage,
+        yPercentage: input.dto.yPercentage,
+        reviewId: input.review.id,
+        messages: {
+          create: [
+            {
+              content: input.dto.message,
+              sentById: input.user.id,
+              files: {
+                create: input.dto.files.map((file) => {
+                  return {
+                    originalFilename: file.originalFilename,
+                    size: file.size,
+                    storedKey: file.storedKey,
+                  }
+                }),
+              },
+            },
+          ],
+        },
+      },
+    })
+
+    return {
+      threadId: thread.id,
+    }
+  }
 
   async createReview(
     workspace: Workspace,
@@ -26,7 +69,7 @@ export class ReviewService {
               data: {
                 originalFilename: input.file.claims.originalFilename,
                 size: input.file.objectMetadata.size,
-                storedKey: input.file.claims.keyStored,
+                storedKey: input.file.claims.storedKey,
               },
             })
 
@@ -88,5 +131,25 @@ export class ReviewService {
     return {
       reviews,
     }
+  }
+
+  async retrieveReviewDetail(reviewId: string) {
+    return await this.dbService.review.findFirst({
+      where: {
+        id: reviewId,
+      },
+      include: {
+        threads: {
+          include: {
+            messages: {
+              include: {
+                sentBy: true,
+                files: true,
+              },
+            },
+          },
+        },
+      },
+    })
   }
 }

@@ -1,10 +1,11 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HttpClient } from 'clients'
 import cssText from 'data-text:~styles.css'
 import { useState } from 'react'
 import { ReviewToolkit } from '~components/ReviewToolkit'
 import { WaitForHost } from '~components/WaitForHost'
 import { useAuth } from '~hooks/useAuth'
-import { useReviewSession } from '~hooks/useReviewSession'
+import { useReviewSession, type ReviewSession } from '~hooks/useReviewSession'
 import { HTTPClientProvider } from '~providers/HTTPClientProvider'
 import { ReviewProvider } from '~providers/ReviewProvider'
 
@@ -14,23 +15,28 @@ export const getStyle = () => {
   return style
 }
 
-const Layout = (props: { token: string }) => {
+const Layout = (props: { token: string; session: ReviewSession }) => {
   const [httpClient] = useState(
     () =>
       new HttpClient(
         process.env.NEXT_PUBLIC_API_URL || process.env.PLASMO_PUBLIC_API_URL,
         {
           Cookie: `review-c_session=${props.token}`,
+          Authorization: props.token,
         }
       )
   )
 
+  const [queryClient] = useState(() => new QueryClient())
+
   return (
-    <HTTPClientProvider httpClient={httpClient}>
-      <ReviewProvider>
-        <ReviewToolkit />
-      </ReviewProvider>
-    </HTTPClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <HTTPClientProvider httpClient={httpClient}>
+        <ReviewProvider session={props.session}>
+          <ReviewToolkit />
+        </ReviewProvider>
+      </HTTPClientProvider>
+    </QueryClientProvider>
   )
 }
 
@@ -40,7 +46,7 @@ const Toolkit = (props: { host: string }) => {
 
   if (!currentReviewSession || !token) return null
 
-  return <Layout token={token} />
+  return <Layout token={token} session={currentReviewSession} />
 }
 
 const content = () => {

@@ -1,8 +1,8 @@
-import { IsNumber, IsString } from 'class-validator'
+import { IsString } from 'class-validator'
 
 export class PresignedFilePostTokenClaimsDTO {
   @IsString()
-  keyStored: string
+  storedKey: string
 
   @IsString()
   originalFilename: string

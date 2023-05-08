@@ -1,3 +1,5 @@
+import { IJWTSessionClaims } from '../auth.controller'
+import { USER_JWT_SERVICE } from '../user-jwt.module'
 import {
   CanActivate,
   ExecutionContext,
@@ -10,8 +12,6 @@ import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
 import { JWT_SESSION_COOKIE_NAME } from 'src/constants/cookie'
 import { DatabaseService } from 'src/modules/database/database.service'
-import { IJWTSessionClaims } from '../auth.controller'
-import { USER_JWT_SERVICE } from '../user-jwt.module'
 
 export const USER_REQUEST_KEY = 'user'
 
@@ -26,7 +26,9 @@ export class UserGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest()
 
-    const token = request.cookies[JWT_SESSION_COOKIE_NAME]
+    const token =
+      request.cookies[JWT_SESSION_COOKIE_NAME] ||
+      request.header('Authorization')
 
     if (!token) {
       this.throwUnauthorized()
@@ -57,6 +59,8 @@ export class UserGuard implements CanActivate {
         memberships: true,
       },
     })
+
+    console.log('user', user)
 
     if (!user) {
       this.throwUnauthorized()

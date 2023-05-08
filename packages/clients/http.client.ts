@@ -35,6 +35,8 @@ export class HttpClient {
   ): Promise<FetchResponse<T>> {
     const url = `${this.baseUrl}${path}`
 
+    console.log('headers', this.headers)
+
     const params = {
       method: options.method,
       headers: {
@@ -108,7 +110,7 @@ export class HttpClient {
 
   async post<T>(
     path: string,
-    body?: Record<string, unknown> | FormData,
+    body?: Record<string, unknown> | FormData | object,
     headers?: Record<string, string>
   ): Promise<FetchResponse<T>> {
     const options = {

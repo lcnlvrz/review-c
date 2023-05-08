@@ -18,16 +18,16 @@ export class FileService {
   ) {}
 
   async generatePresignedPOST(dto: GeneratePresignedPostDTO) {
-    const keyStored = this.normalizeFilename(dto.filename)
+    const storedKey = this.normalizeFilename(dto.filename)
 
     const presignedPOST = await this.s3Service.generatePresignedPostURL({
       contentType: dto.mimetype,
       expirationInSeconds: POST_PRESIGNED_URL_EXPIRATION_SECONDS,
-      key: keyStored,
+      key: storedKey,
     })
 
     const claims: PresignedFilePostTokenClaimsDTO = {
-      keyStored,
+      storedKey,
       originalFilename: dto.filename,
     }
 

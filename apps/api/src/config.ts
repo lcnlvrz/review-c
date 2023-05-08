@@ -11,6 +11,9 @@ export const configApp = async (app: INestApplication) => {
   app.useGlobalInterceptors(new ResponseInterceptor())
   app.useGlobalPipes(new ValidationPipe())
 
+  app.enableCors({
+    origin: '*',
+  })
+
   app.use(cookieParser())
-  app.use(generateCorsMiddleware(['/file/presigned']))
 }

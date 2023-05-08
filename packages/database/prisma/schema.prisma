@@ -22,6 +22,7 @@ model User {
   Workspace         Workspace[]
   Invitation        Invitation[]
   ReviewUser        ReviewUser[]
+  Message           Message[]
 }
 
 model IdentityProvider {
@@ -72,21 +73,22 @@ model Workspace {
   name        String
   description String       @db.Text
   members     Member[]
-  User        User?        @relation(fields: [userId], references: [id])
+  user        User?        @relation(fields: [userId], references: [id])
   userId      Int?
   invitations Invitation[]
-  Review      Review[]
+  review      Review[]
 
   @@index([userId])
 }
 
 model File {
-  id               Int      @id @default(autoincrement())
+  id               Int       @id @default(autoincrement())
   storedKey        String
   originalFilename String
   size             Int
-  createdAt        DateTime @default(now())
-  Review           Review[]
+  createdAt        DateTime  @default(now())
+  review           Review[]
+  messages         Message[]
 }
 
 enum ReviewUserRole {
@@ -109,6 +111,31 @@ model ReviewUser {
   @@index([reviewId])
 }
 
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  sentBy    User     @relation(fields: [sentById], references: [id])
+  sentById  Int
+  files     File[]
+  threads   Thread[]
+
+  @@index([sentById])
+}
+
+model Thread {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  messages    Message[]
+  reviewId    String
+  review      Review    @relation(fields: [reviewId], references: [id])
+  xPath       String
+  xPercentage Float
+  yPercentage Float
+
+  @@index([reviewId])
+}
+
 model Review {
   id          String       @id
   type        ReviewType
@@ -121,6 +148,7 @@ model Review {
   fileId      Int?
   users       ReviewUser[]
   createdAt   DateTime     @default(now())
+  threads     Thread[]
 
   @@index([fileId])
   @@index([workspaceId])

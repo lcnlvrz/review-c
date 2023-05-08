@@ -6,7 +6,7 @@ export interface ReviewingState {
   hosts: string[]
 }
 
-interface ReviewSession {
+export interface ReviewSession {
   review: {
     id: string
     title: string

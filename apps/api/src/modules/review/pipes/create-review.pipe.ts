@@ -1,3 +1,5 @@
+import { CreateReviewDTO } from '../dtos/create-review.dto'
+import { HttpService } from '@nestjs/axios'
 import {
   BadRequestException,
   HttpServer,
@@ -6,19 +8,17 @@ import {
   Injectable,
   PipeTransform,
 } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
 import { plainToInstance } from 'class-transformer'
 import { validateOrReject } from 'class-validator'
-import { CreateReviewDTO } from '../dtos/create-review.dto'
-import { FILE_JWT_SERVICE } from 'src/modules/file/file-jwt.module'
-import { JwtService } from '@nestjs/jwt'
-import { PresignedFilePostTokenClaimsDTO } from 'src/modules/file/dtos/presigned-file-post-token-claims.dto'
+import { firstValueFrom } from 'rxjs'
 import { AppError } from 'src/common/error'
+import { PresignedFilePostTokenClaimsDTO } from 'src/modules/file/dtos/presigned-file-post-token-claims.dto'
+import { FILE_JWT_SERVICE } from 'src/modules/file/file-jwt.module'
 import {
   IObjectMetadata,
   S3Provider,
 } from 'src/modules/file/providers/s3.provider'
-import { firstValueFrom } from 'rxjs'
-import { HttpService } from '@nestjs/axios'
 
 export type CreateReviewPipeOutput =
   | {
@@ -73,7 +73,7 @@ export class CreateReviewPipe implements PipeTransform {
           throw this.unauthorizedFileToken()
         }
 
-        const objectMetadata = await this.s3.getMetadataObject(claims.keyStored)
+        const objectMetadata = await this.s3.getMetadataObject(claims.storedKey)
 
         if (!objectMetadata.exists) {
           throw new AppError({

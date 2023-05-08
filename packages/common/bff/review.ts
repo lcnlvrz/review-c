@@ -1,3 +1,11 @@
+export interface StartThreadInput {
+  xPath: string
+  xPercentage: number
+  yPercentage: number
+  message: string
+  files: string[]
+}
+
 export interface CreateReviewInput {
   type: 'FILE' | 'URL'
   file?: string | undefined | null
@@ -21,6 +29,7 @@ export interface File {
   storedKey: string
   originalFilename: string
   size: number
+  url?: string
 }
 
 export interface Review {
@@ -32,6 +41,34 @@ export interface Review {
   users: ReviewUser[]
 }
 
+export interface User {
+  email: string
+  firstName: string
+  lastName: string
+}
+
+export interface Message {
+  files: File[]
+  id: number
+  content: string
+  createdAt: Date
+  sentBy: User
+}
+
+export interface Thread {
+  id: number
+  createdAt: Date
+  messages: Message[]
+  xPath: string
+  yPercentage: number
+  xPercentage: number
+}
+
 export interface ListReviewsOutput {
   reviews: Review[]
+}
+
+export interface RetrieveReviewDetailOutput
+  extends Omit<Review, 'users' | 'threads'> {
+  threads: Thread[]
 }

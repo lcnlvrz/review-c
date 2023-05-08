@@ -2,14 +2,16 @@ import { ImageGallery } from './ImageGallery'
 import { InspectElements } from './InspectElements'
 import { MarkerAvatar } from './MarkerAvatar'
 import { Textarea } from './Textarea'
-import { Button } from './button/button'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Camera, MessageCircle, Plus, Send, X } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { Camera, MessageCircle, Plus, Send } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import type { Thread } from '~../../packages/common'
 import { useAPI } from '~hooks/useAPI'
 import { useAuth } from '~hooks/useAuth'
 import { useDisclosure } from '~hooks/useDisclosure'
+import { buildReviewDetailQueryKey } from '~hooks/useReviewDetail'
 import { useScreenshot } from '~hooks/useScreenshot'
 import { getXPath } from '~lib/get-xpath'
 import { isExtensionDOM } from '~lib/is-extension-dom'
@@ -18,13 +20,21 @@ import { cn } from '~lib/utils'
 import { useReview } from '~providers/ReviewProvider'
 import { pointSchema, type PointSchema } from '~schemas/point.schema'
 
-interface MarkerPoint {
-  xpath: string
-  xPercentage: number
-  yPercentage: number
-  top: number
-  left: number
-}
+type MarkerPoint =
+  | {
+      visible: true
+      xpath: string
+      xPercentage: number
+      yPercentage: number
+      top: number
+      left: number
+    }
+  | {
+      visible: false
+      xpath: string
+      xPercentage: number
+      yPercentage: number
+    }
 
 const Point = (props: { left: number; top: number }) => {
   const auth = useAuth()
@@ -53,8 +63,13 @@ const Point = (props: { left: number; top: number }) => {
   )
 }
 
-const CommitPoint = (props: { stagedPoint?: MarkerPoint }) => {
+const CommitPoint = (props: {
+  stagedPoint: MarkerPoint
+  clearStagedPoint: () => void
+}) => {
   const ctx = useReview()
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const {
     takeScreenshot,
@@ -73,6 +88,10 @@ const CommitPoint = (props: { stagedPoint?: MarkerPoint }) => {
       yPercentage: props.stagedPoint.yPercentage,
     },
   })
+
+  const reviewAPI = useAPI('review')
+
+  const queryClient = useQueryClient()
 
   const inspectElementsCtrl = useDisclosure()
 
@@ -113,9 +132,37 @@ const CommitPoint = (props: { stagedPoint?: MarkerPoint }) => {
     []
   )
 
+  const onStartThread = useCallback(
+    (data: PointSchema) => {
+      setIsLoading(true)
+
+      reviewAPI
+        .startThread(
+          ctx.reviewSession.workspace.id,
+          ctx.reviewSession.review.id,
+          {
+            yPercentage: props.stagedPoint.yPercentage,
+            xPercentage: props.stagedPoint.xPercentage,
+            xPath: props.stagedPoint.xpath,
+            files: screenshots.map((screenshot) => screenshot.token),
+            message: data.message,
+          }
+        )
+        .then(() => {
+          queryClient.invalidateQueries([
+            buildReviewDetailQueryKey(ctx.reviewSession.review.id),
+          ])
+
+          props.clearStagedPoint()
+        })
+        .finally(() => setIsLoading(false))
+    },
+    [ctx.reviewSession, screenshots.length]
+  )
+
   return (
     <div>
-      {ctx.mustShowAbsoluteElements && (
+      {ctx.mustShowAbsoluteElements && props.stagedPoint.visible && (
         <div>
           <Point left={props.stagedPoint.left} top={props.stagedPoint.top} />
           <div
@@ -168,6 +215,11 @@ const CommitPoint = (props: { stagedPoint?: MarkerPoint }) => {
               </div>
 
               <button
+                onClick={() => onStartThread(methods.getValues())}
+                disabled={
+                  screenshots.some((s) => s.isLoading) ||
+                  methods.formState.isSubmitting
+                }
                 title="Send comment"
                 className="hover:bg-primary rounded-full group p-1 transition-all "
               >
@@ -239,6 +291,7 @@ const CommitPointListener = (props: {
     const y = event.clientY - rect.top
 
     const point: MarkerPoint = {
+      visible: true,
       yPercentage: (y / rect.height) * 100,
       xPercentage: (x / rect.width) * 100,
       xpath: path,
@@ -258,7 +311,7 @@ const CommitPointListener = (props: {
     }
   }, [props.stagedPoint])
 
-  if (!props.stagedPoint) return null
+  if (!props.stagedPoint || !props.stagedPoint.visible) return null
 
   return (
     <div>
@@ -304,32 +357,68 @@ const CommitPointListener = (props: {
   )
 }
 
-export const Points = () => {
-  const [committedPoints, setCommittedPoints] = useState<MarkerPoint[]>([])
+export const Points = (props: { threads: Thread[] }) => {
   const [stagedPoint, setStagedPoint] = useState<MarkerPoint>()
 
   const ctx = useReview()
 
-  const recalculatePoint = useCallback((point: MarkerPoint) => {
-    const node = queryDomElemXPath(point.xpath)
+  const iterateReviewThreads = useCallback((threads: Thread[] = []) => {
+    return threads.map((t) =>
+      recalculatePoint({
+        xpath: t.xPath,
+        xPercentage: t.xPercentage,
+        yPercentage: t.yPercentage,
+      })
+    )
+  }, [])
 
-    if (!node) {
-      console.log('not found node')
-      return point
-    }
+  const recalculatePoint = useCallback(
+    <T extends Omit<MarkerPoint, 'left' | 'top' | 'visible'>>(point: T) => {
+      const node = queryDomElemXPath(point.xpath)
 
-    const rect = (node as HTMLElement).getBoundingClientRect()
+      if (!node) {
+        console.log('not found nod with xpath', point.xpath)
+        return {
+          ...point,
+          visible: false,
+        } as const
+      }
 
-    const top =
-      rect.top + window.scrollY + (point.yPercentage * rect.height) / 100
+      const rect = (node as HTMLElement).getBoundingClientRect()
 
-    const left =
-      rect.left + window.scrollX + (point.xPercentage * rect.width) / 100
+      const top =
+        rect.top + window.scrollY + (point.yPercentage * rect.height) / 100
 
-    return {
-      ...point,
-      top,
-      left,
+      const left =
+        rect.left + window.scrollX + (point.xPercentage * rect.width) / 100
+
+      return {
+        ...point,
+        visible: true,
+        top,
+        left,
+      } as const
+    },
+    []
+  )
+
+  const [committedPoints, setCommittedPoints] = useState<MarkerPoint[]>(() =>
+    iterateReviewThreads(props.threads)
+  )
+
+  useEffect(() => {
+    setCommittedPoints(iterateReviewThreads(props.threads))
+  }, [props.threads.length])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCommittedPoints((markers) =>
+        markers.map((marker) => recalculatePoint(marker))
+      )
+    }, 2000)
+
+    return () => {
+      clearInterval(interval)
     }
   }, [])
 
@@ -343,7 +432,7 @@ export const Points = () => {
 
       return recalculatePoint(point)
     })
-  }, [committedPoints, stagedPoint])
+  }, [])
 
   useEffect(() => {
     window.addEventListener('scroll', onLayoutChange)
@@ -364,11 +453,20 @@ export const Points = () => {
         />
       )}
 
-      {stagedPoint && <CommitPoint stagedPoint={stagedPoint} />}
+      {stagedPoint && (
+        <CommitPoint
+          clearStagedPoint={() => setStagedPoint(undefined)}
+          stagedPoint={stagedPoint}
+        />
+      )}
 
-      {committedPoints.map((p, index) => (
-        <Point key={index} {...p} />
-      ))}
+      {committedPoints.map((p, index) => {
+        if (p.visible) {
+          return <Point key={index} {...p} />
+        }
+
+        return null
+      })}
     </div>
   )
 }

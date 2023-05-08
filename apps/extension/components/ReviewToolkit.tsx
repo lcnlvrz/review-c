@@ -6,15 +6,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './Tooltip'
+import { WaitForQuery } from './WaitForQuery'
 import { MessageCircle } from 'lucide-react'
 import { useRef } from 'react'
+import { useReviewDetail } from '~hooks/useReviewDetail'
 import { cn } from '~lib/utils'
 import { useReview } from '~providers/ReviewProvider'
 
 export const ReviewToolkit = () => {
   const ref = useRef<HTMLDivElement>()
-
   const ctx = useReview()
+
+  const query = useReviewDetail()
 
   return (
     <div
@@ -22,7 +25,9 @@ export const ReviewToolkit = () => {
         e.stopPropagation()
       }}
     >
-      <Points />
+      <WaitForQuery query={query}>
+        {({ data }) => <Points threads={data?.threads} />}
+      </WaitForQuery>
       {ctx.cursorFocused && <Cursor />}
       <div
         ref={ref}

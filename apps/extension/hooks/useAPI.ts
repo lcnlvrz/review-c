@@ -11,6 +11,5 @@ export const useAPI = <T extends keyof typeof clients>(
   api: T
 ): (typeof clients)[T]['prototype'] => {
   const { httpClient } = useHTTPClient()
-
   return new clients[api](httpClient)
 }

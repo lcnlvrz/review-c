@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useState } from 'react'
+import type { ReviewSession } from '~hooks/useReviewSession'
 
 interface ReviewContext {
+  reviewSession: ReviewSession
   inspectElements: boolean
   startInspectElements: () => void
   stopInspectElements: () => void
@@ -14,6 +16,16 @@ interface ReviewContext {
 }
 
 const ReviewContext = createContext<ReviewContext>({
+  reviewSession: {
+    review: {
+      id: '',
+      title: '',
+    },
+    workspace: {
+      id: '',
+      name: '',
+    },
+  },
   inspectElements: false,
   cursorFocused: false,
   mustShowAbsoluteElements: true,
@@ -28,7 +40,11 @@ const ReviewContext = createContext<ReviewContext>({
 
 export const useReview = () => useContext(ReviewContext)
 
-export const ReviewProvider = (props: React.PropsWithChildren<{}>) => {
+export const ReviewProvider = (
+  props: React.PropsWithChildren<{
+    session: ReviewContext['reviewSession']
+  }>
+) => {
   const [cursorFocused, setCursorFocused] = useState(false)
   const [inspectElements, setInspectElements] = useState(false)
 
@@ -94,6 +110,7 @@ export const ReviewProvider = (props: React.PropsWithChildren<{}>) => {
   return (
     <ReviewContext.Provider
       value={{
+        reviewSession: props.session,
         stopInspectElements,
         startInspectElements,
         inspectElements,

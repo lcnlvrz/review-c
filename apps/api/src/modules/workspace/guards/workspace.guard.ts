@@ -1,3 +1,6 @@
+import { WorkspaceParamDTO } from '../dtos/workspace-param.dto'
+import { MEMBER_REQUEST_KEY } from './member.guard'
+import { WORKSPACE_REQUEST_KEY } from './workspace-member-role.guard'
 import {
   BadRequestException,
   CanActivate,
@@ -14,9 +17,6 @@ import { Request } from 'express'
 import { AppError } from 'src/common/error'
 import { USER_REQUEST_KEY } from 'src/modules/auth/guards/user.guard'
 import { DatabaseService } from 'src/modules/database/database.service'
-import { WorkspaceParamDTO } from '../dtos/workspace-param.dto'
-import { MEMBER_REQUEST_KEY } from './member.guard'
-import { WORKSPACE_REQUEST_KEY } from './workspace-member-role.guard'
 
 @Injectable()
 export class WorkspaceGuard implements CanActivate {
@@ -52,6 +52,8 @@ export class WorkspaceGuard implements CanActivate {
         },
       },
     })
+
+    console.log('workspace', workspace)
 
     if (!workspace) {
       throw new NotFoundException(
