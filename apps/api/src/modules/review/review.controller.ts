@@ -3,7 +3,6 @@ import { UserGuard } from '../auth/guards/user.guard'
 import { ReqWorkspace } from '../workspace/decorators/workspace.decorator'
 import { WorkspaceGuard } from '../workspace/guards/workspace.guard'
 import { ReqReview } from './decorators/review.decorator'
-import { ICreateThreadDTO } from './dtos/start-thread.dto'
 import { ReviewGuard } from './guards/review.guard'
 import {
   CreateReviewPipe,
@@ -18,11 +17,9 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
-  Options,
+  Header,
+  Headers,
   Post,
-  Res,
   UseGuards,
 } from '@nestjs/common'
 import { Review, User, Workspace } from 'database'
@@ -37,9 +34,11 @@ export class ReviewController {
     @Body(StartReviewThreadPipe) dto: StartReviewThreadPipeOutput,
     @ReqUser() user: User,
     @ReqWorkspace() workspace: Workspace,
-    @ReqReview() review: Review
+    @ReqReview() review: Review,
+    @Headers('user-agent') userAgent: string
   ) {
     return await this.reviewService.startThread({
+      userAgent,
       dto,
       review,
       user,

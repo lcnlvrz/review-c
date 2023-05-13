@@ -1,7 +1,9 @@
+import type { User } from 'database'
 import { createContext, useCallback, useContext, useState } from 'react'
 import type { ReviewSession } from '~hooks/useReviewSession'
 
 interface ReviewContext {
+  auth: User
   reviewSession: ReviewSession
   inspectElements: boolean
   startInspectElements: () => void
@@ -16,6 +18,13 @@ interface ReviewContext {
 }
 
 const ReviewContext = createContext<ReviewContext>({
+  auth: {
+    id: 0,
+    avatar: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+  },
   reviewSession: {
     review: {
       id: '',
@@ -43,6 +52,7 @@ export const useReview = () => useContext(ReviewContext)
 export const ReviewProvider = (
   props: React.PropsWithChildren<{
     session: ReviewContext['reviewSession']
+    auth: ReviewContext['auth']
   }>
 ) => {
   const [cursorFocused, setCursorFocused] = useState(false)
@@ -110,6 +120,7 @@ export const ReviewProvider = (
   return (
     <ReviewContext.Provider
       value={{
+        auth: props.auth,
         reviewSession: props.session,
         stopInspectElements,
         startInspectElements,

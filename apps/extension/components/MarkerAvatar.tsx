@@ -1,12 +1,20 @@
-import { MessageCircle } from 'lucide-react'
-import { useAuth } from '~hooks/useAuth'
+import { Avatar, AvatarFallback, AvatarImage } from './avatar/avatar'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'ui'
 
-export const MarkerAvatar = () => {
-  const auth = useAuth()
-
+export const MarkerAvatar = ({ src, name }: { src: string; name: string }) => {
   return (
-    <div className="bg-white p-2 rounded-full shadow-lg border-gray-400 border">
-      <MessageCircle className="-scale-x-1 text-primary" />
-    </div>
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Avatar className="border border-gray-200">
+            <AvatarImage src={src} alt="@shadcn" />
+            <AvatarFallback>{name}</AvatarFallback>
+          </Avatar>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{name}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }

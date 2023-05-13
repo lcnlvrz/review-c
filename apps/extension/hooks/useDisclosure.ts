@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useState } from 'react'
 
 export const useDisclosure = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -7,5 +7,5 @@ export const useDisclosure = () => {
 
   const onClose = useCallback(() => setIsOpen(false), [])
 
-  return { isOpen, onOpen, onClose }
+  return { isOpen, onOpen, onClose, setIsOpen }
 }

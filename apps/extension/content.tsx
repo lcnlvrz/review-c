@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HttpClient } from 'clients'
+import type { User } from 'common'
 import cssText from 'data-text:~styles.css'
 import { useState } from 'react'
 import { ReviewToolkit } from '~components/ReviewToolkit'
@@ -15,7 +16,11 @@ export const getStyle = () => {
   return style
 }
 
-const Layout = (props: { token: string; session: ReviewSession }) => {
+const Layout = (props: {
+  auth: User
+  token: string
+  session: ReviewSession
+}) => {
   const [httpClient] = useState(
     () =>
       new HttpClient(
@@ -32,7 +37,7 @@ const Layout = (props: { token: string; session: ReviewSession }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <HTTPClientProvider httpClient={httpClient}>
-        <ReviewProvider session={props.session}>
+        <ReviewProvider auth={props.auth} session={props.session}>
           <ReviewToolkit />
         </ReviewProvider>
       </HTTPClientProvider>
@@ -42,11 +47,11 @@ const Layout = (props: { token: string; session: ReviewSession }) => {
 
 const Toolkit = (props: { host: string }) => {
   const { currentReviewSession } = useReviewSession(props.host)
-  const { token } = useAuth()
+  const { token, auth } = useAuth()
 
   if (!currentReviewSession || !token) return null
 
-  return <Layout token={token} session={currentReviewSession} />
+  return <Layout auth={auth} token={token} session={currentReviewSession} />
 }
 
 const content = () => {

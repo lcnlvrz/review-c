@@ -5,9 +5,12 @@ import {
   ValidateIf,
   IsUrl,
   MaxLength,
+  IsNumber,
+  Min,
+  IsNotEmpty,
 } from 'class-validator'
-import { ReviewType } from 'database'
 import { CreateReviewInput } from 'common'
+import { ReviewType } from 'database'
 
 export class CreateReviewDTO implements CreateReviewInput {
   @IsString()

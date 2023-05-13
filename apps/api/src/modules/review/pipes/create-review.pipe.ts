@@ -57,8 +57,6 @@ export class CreateReviewPipe implements PipeTransform {
       case 'FILE': {
         let payload: any
 
-        console.log('dto.file', dto.file)
-
         try {
           payload = this.jwtService.verify(dto.file)
         } catch (err) {

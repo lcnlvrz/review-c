@@ -1,69 +1,28 @@
 import { ImageGallery } from './ImageGallery'
 import { InspectElements } from './InspectElements'
-import { MarkerAvatar } from './MarkerAvatar'
+import { PointMarker, type MarkerPoint } from './PointMarker'
 import { Textarea } from './Textarea'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
-import { Camera, MessageCircle, Plus, Send } from 'lucide-react'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { Camera, Plus, Send } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import type { Thread } from '~../../packages/common'
+import { getUserAgentSpecs } from '~../../packages/common'
 import { useAPI } from '~hooks/useAPI'
-import { useAuth } from '~hooks/useAuth'
 import { useDisclosure } from '~hooks/useDisclosure'
 import { buildReviewDetailQueryKey } from '~hooks/useReviewDetail'
 import { useScreenshot } from '~hooks/useScreenshot'
 import { getXPath } from '~lib/get-xpath'
 import { isExtensionDOM } from '~lib/is-extension-dom'
-import { queryDomElemXPath } from '~lib/query-dom-elem-xpath'
 import { cn } from '~lib/utils'
 import { useReview } from '~providers/ReviewProvider'
 import { pointSchema, type PointSchema } from '~schemas/point.schema'
 
-type MarkerPoint =
-  | {
-      visible: true
-      xpath: string
-      xPercentage: number
-      yPercentage: number
-      top: number
-      left: number
-    }
-  | {
-      visible: false
-      xpath: string
-      xPercentage: number
-      yPercentage: number
-    }
+dayjs.extend(relativeTime)
 
-const Point = (props: { left: number; top: number }) => {
-  const auth = useAuth()
-
-  return (
-    <>
-      <div
-        style={{
-          transform: `translate(${props.left}px, ${props.top}px)`,
-        }}
-        className={cn(`absolute z-1`)}
-      >
-        <div className="bg-white p-2 rounded-full shadow-lg border-gray-400 border">
-          <MessageCircle className="-scale-x-1 text-primary" />
-        </div>
-      </div>
-      <div
-        style={{
-          transform: `translate(${props.left + 25}px, ${props.top}px)`,
-        }}
-        className={cn(`absolute -z-10`)}
-      >
-        <MarkerAvatar />
-      </div>
-    </>
-  )
-}
-
-const CommitPoint = (props: {
+export const StagedPoint = (props: {
   stagedPoint: MarkerPoint
   clearStagedPoint: () => void
 }) => {
@@ -83,7 +42,7 @@ const CommitPoint = (props: {
     resolver: zodResolver(pointSchema),
     defaultValues: {
       message: '',
-      xpath: props.stagedPoint.xpath,
+      xpath: props.stagedPoint.xPath,
       xPercentage: props.stagedPoint.xPercentage,
       yPercentage: props.stagedPoint.yPercentage,
     },
@@ -141,9 +100,11 @@ const CommitPoint = (props: {
           ctx.reviewSession.workspace.id,
           ctx.reviewSession.review.id,
           {
+            windowWidth: window.innerWidth,
+            windowHeight: window.innerHeight,
             yPercentage: props.stagedPoint.yPercentage,
             xPercentage: props.stagedPoint.xPercentage,
-            xPath: props.stagedPoint.xpath,
+            xPath: props.stagedPoint.xPath,
             files: screenshots.map((screenshot) => screenshot.token),
             message: data.message,
           }
@@ -164,7 +125,7 @@ const CommitPoint = (props: {
     <div>
       {ctx.mustShowAbsoluteElements && props.stagedPoint.visible && (
         <div>
-          <Point left={props.stagedPoint.left} top={props.stagedPoint.top} />
+          <PointMarker point={props.stagedPoint} isStagedPoint />
           <div
             style={{
               transform: `translate(${props.stagedPoint.left + 68}px, ${
@@ -247,7 +208,7 @@ const CommitPoint = (props: {
   )
 }
 
-const CommitPointListener = (props: {
+export const StagedPointListener = (props: {
   stagedPoint?: MarkerPoint
   setStagedPoint: (point: MarkerPoint) => void
 }) => {
@@ -283,25 +244,47 @@ const CommitPointListener = (props: {
 
     const target = event.target as HTMLElement
 
-    const path = getXPath(target)
+    const xPath = getXPath(target)
 
     const rect = target.getBoundingClientRect()
 
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top
 
-    const point: MarkerPoint = {
-      visible: true,
-      yPercentage: (y / rect.height) * 100,
-      xPercentage: (x / rect.width) * 100,
-      xpath: path,
-      top: event.pageY,
-      left: event.pageX,
-    }
+    const specs = getUserAgentSpecs(navigator.userAgent)
 
-    props.setStagedPoint(point)
-    ctx.blurCursor()
+    if (isSpecsClientSide(specs)) {
+      const point: MarkerPoint = {
+        ...specs,
+        xPath,
+        visible: true,
+        yPercentage: (y / rect.height) * 100,
+        xPercentage: (x / rect.width) * 100,
+        top: event.pageY,
+        left: event.pageX,
+        createdBy: ctx.auth,
+        message: {
+          content: '',
+          sentBy: ctx.auth,
+          createdAt: new Date(),
+          sentById: ctx.auth.id,
+        },
+        createdAt: new Date(),
+      }
+
+      props.setStagedPoint(point)
+      ctx.blurCursor()
+    }
   }, [])
+
+  const isSpecsClientSide = (
+    specs: ReturnType<typeof getUserAgentSpecs>
+  ): specs is Required<ReturnType<typeof getUserAgentSpecs>> => {
+    return (
+      typeof specs.windowHeight === 'number' &&
+      typeof specs.windowWidth === 'number'
+    )
+  }
 
   useEffect(() => {
     window.addEventListener('click', handleMouseClick)
@@ -315,7 +298,7 @@ const CommitPointListener = (props: {
 
   return (
     <div>
-      <Point left={props.stagedPoint.left} top={props.stagedPoint.top} />
+      <PointMarker point={props.stagedPoint} isStagedPoint />
       <div
         ref={ref}
         style={{
@@ -353,120 +336,6 @@ const CommitPointListener = (props: {
           </button>
         </div>
       </div>
-    </div>
-  )
-}
-
-export const Points = (props: { threads: Thread[] }) => {
-  const [stagedPoint, setStagedPoint] = useState<MarkerPoint>()
-
-  const ctx = useReview()
-
-  const iterateReviewThreads = useCallback((threads: Thread[] = []) => {
-    return threads.map((t) =>
-      recalculatePoint({
-        xpath: t.xPath,
-        xPercentage: t.xPercentage,
-        yPercentage: t.yPercentage,
-      })
-    )
-  }, [])
-
-  const recalculatePoint = useCallback(
-    <T extends Omit<MarkerPoint, 'left' | 'top' | 'visible'>>(point: T) => {
-      const node = queryDomElemXPath(point.xpath)
-
-      if (!node) {
-        console.log('not found nod with xpath', point.xpath)
-        return {
-          ...point,
-          visible: false,
-        } as const
-      }
-
-      const rect = (node as HTMLElement).getBoundingClientRect()
-
-      const top =
-        rect.top + window.scrollY + (point.yPercentage * rect.height) / 100
-
-      const left =
-        rect.left + window.scrollX + (point.xPercentage * rect.width) / 100
-
-      return {
-        ...point,
-        visible: true,
-        top,
-        left,
-      } as const
-    },
-    []
-  )
-
-  const [committedPoints, setCommittedPoints] = useState<MarkerPoint[]>(() =>
-    iterateReviewThreads(props.threads)
-  )
-
-  useEffect(() => {
-    setCommittedPoints(iterateReviewThreads(props.threads))
-  }, [props.threads.length])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCommittedPoints((markers) =>
-        markers.map((marker) => recalculatePoint(marker))
-      )
-    }, 2000)
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [])
-
-  const onLayoutChange = useCallback(() => {
-    setCommittedPoints((prev) => prev.map((p) => recalculatePoint(p)))
-
-    setStagedPoint((point) => {
-      if (!point) {
-        return point
-      }
-
-      return recalculatePoint(point)
-    })
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('scroll', onLayoutChange)
-    window.addEventListener('resize', onLayoutChange)
-
-    return () => {
-      window.removeEventListener('resize', onLayoutChange)
-      window.removeEventListener('scroll', onLayoutChange)
-    }
-  }, [])
-
-  return (
-    <div>
-      {ctx.cursorFocused && (
-        <CommitPointListener
-          stagedPoint={stagedPoint}
-          setStagedPoint={(point) => setStagedPoint(point)}
-        />
-      )}
-
-      {stagedPoint && (
-        <CommitPoint
-          clearStagedPoint={() => setStagedPoint(undefined)}
-          stagedPoint={stagedPoint}
-        />
-      )}
-
-      {committedPoints.map((p, index) => {
-        if (p.visible) {
-          return <Point key={index} {...p} />
-        }
-
-        return null
-      })}
     </div>
   )
 }

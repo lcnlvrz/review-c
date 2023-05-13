@@ -6,7 +6,7 @@ import { randomStringGenerator } from '@nestjs/common/utils/random-string-genera
 import {
   CreateReviewOutput,
   ListReviewsOutput,
-  RetrieveReviewDetailOutput,
+  getUserAgentSpecs,
 } from 'common'
 import * as crypto from 'crypto'
 import { Review, User, Workspace } from 'database'
@@ -22,26 +22,46 @@ export class ReviewService {
     workspace: Workspace
     review: Review
     dto: StartReviewThreadPipeOutput
+    userAgent: string
   }) {
+    const specs = getUserAgentSpecs(input.userAgent)
+
     const thread = await this.dbService.thread.create({
       data: {
-        xPath: input.dto.xPath,
-        xPercentage: input.dto.xPercentage,
-        yPercentage: input.dto.yPercentage,
-        reviewId: input.review.id,
+        point: {
+          create: {
+            isMobile: specs.isMobile,
+            browser: specs.browser,
+            os: specs.os,
+            windowHeight: input.dto.windowHeight,
+            windowWidth: input.dto.windowWidth,
+            xPath: input.dto.xPath,
+            xPercentage: input.dto.xPercentage,
+            yPercentage: input.dto.yPercentage,
+            createdById: input.user.id,
+          },
+        },
+        startedBy: {
+          connect: {
+            id: input.user.id,
+          },
+        },
+        review: {
+          connect: {
+            id: input.review.id,
+          },
+        },
         messages: {
           create: [
             {
               content: input.dto.message,
               sentById: input.user.id,
               files: {
-                create: input.dto.files.map((file) => {
-                  return {
-                    originalFilename: file.originalFilename,
-                    size: file.size,
-                    storedKey: file.storedKey,
-                  }
-                }),
+                create: input.dto.files.map((file) => ({
+                  originalFilename: file.originalFilename,
+                  size: file.size,
+                  storedKey: file.storedKey,
+                })),
               },
             },
           ],
@@ -141,6 +161,11 @@ export class ReviewService {
       include: {
         threads: {
           include: {
+            point: {
+              include: {
+                createdBy: true,
+              },
+            },
             messages: {
               include: {
                 sentBy: true,

@@ -1,5 +1,5 @@
 import { Cursor } from './Cursor'
-import { Points } from './Points'
+import { GridPoints } from './GridPoints'
 import {
   Tooltip,
   TooltipContent,
@@ -26,7 +26,7 @@ export const ReviewToolkit = () => {
       }}
     >
       <WaitForQuery query={query}>
-        {({ data }) => <Points threads={data?.threads} />}
+        {({ data }) => <GridPoints threads={data?.threads} />}
       </WaitForQuery>
       {ctx.cursorFocused && <Cursor />}
       <div

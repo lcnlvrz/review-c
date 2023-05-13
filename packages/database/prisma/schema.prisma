@@ -19,10 +19,12 @@ model User {
   avatar            String             @db.Text
   identityProviders IdentityProvider[]
   memberships       Member[]
-  Workspace         Workspace[]
-  Invitation        Invitation[]
-  ReviewUser        ReviewUser[]
-  Message           Message[]
+  workspaces        Workspace[]
+  invitations       Invitation[]
+  reviewUsers       ReviewUser[]
+  messages          Message[]
+  threads           Thread[]
+  points            Point[]
 }
 
 model IdentityProvider {
@@ -123,17 +125,38 @@ model Message {
   @@index([sentById])
 }
 
+model Point {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  createdBy    User     @relation(fields: [createdById], references: [id])
+  createdById  Int
+  xPath        String
+  xPercentage  Float
+  yPercentage  Float
+  threads      Thread[]
+  browser      String
+  os           String
+  isMobile     Boolean?
+  windowWidth  Int
+  windowHeight Int
+
+  @@index([createdById])
+}
+
 model Thread {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now())
   messages    Message[]
-  reviewId    String
+  startedBy   User      @relation(fields: [startedById], references: [id])
+  startedById Int
   review      Review    @relation(fields: [reviewId], references: [id])
-  xPath       String
-  xPercentage Float
-  yPercentage Float
+  reviewId    String
+  pointId     Int
+  point       Point     @relation(fields: [pointId], references: [id])
 
   @@index([reviewId])
+  @@index([pointId])
+  @@index([startedById])
 }
 
 model Review {

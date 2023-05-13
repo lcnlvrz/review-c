@@ -1,4 +1,8 @@
+import type { Thread, User } from 'db'
+
 export interface StartThreadInput {
+  windowHeight: number
+  windowWidth: number
   xPath: string
   xPercentage: number
   yPercentage: number
@@ -41,27 +45,12 @@ export interface Review {
   users: ReviewUser[]
 }
 
-export interface User {
-  email: string
-  firstName: string
-  lastName: string
-}
-
 export interface Message {
   files: File[]
   id: number
   content: string
   createdAt: Date
   sentBy: User
-}
-
-export interface Thread {
-  id: number
-  createdAt: Date
-  messages: Message[]
-  xPath: string
-  yPercentage: number
-  xPercentage: number
 }
 
 export interface ListReviewsOutput {

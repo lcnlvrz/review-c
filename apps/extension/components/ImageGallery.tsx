@@ -11,6 +11,7 @@ import { Button } from './button/button'
 import { ChevronLeft, ChevronRight, Minus, Plus, X } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import Draggable from 'react-draggable'
+import { getContentShadowDomRef } from '~lib/get-content-shadow-dom-ref'
 import { EXTENSION_SHADOW_ROOT_CONTAINER_TAG_NAME } from '~lib/is-extension-dom'
 import { cn } from '~lib/utils'
 import { useReview } from '~providers/ReviewProvider'
@@ -87,9 +88,7 @@ export const ImageGallery = (props: {
 
   const ctx = useReview()
 
-  const portalRef = window.document
-    .querySelector(EXTENSION_SHADOW_ROOT_CONTAINER_TAG_NAME)
-    .shadowRoot.getElementById(PORTAL_ID)
+  const portalRef = getContentShadowDomRef()
 
   const applyZoom = useCallback(
     (zoomFactor: number) => {
