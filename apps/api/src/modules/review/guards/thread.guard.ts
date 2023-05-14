@@ -1,4 +1,5 @@
-import { ReviewParamDTO } from '../dtos/review-param.dto'
+import { ThreadParamDTO } from '../dtos/thread-param.dto'
+import { REVIEW_REQUEST_KEY } from './review.guard'
 import {
   BadRequestException,
   CanActivate,
@@ -6,25 +7,33 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  createParamDecorator,
 } from '@nestjs/common'
 import { plainToInstance } from 'class-transformer'
 import { validateOrReject } from 'class-validator'
-import { Workspace } from 'database'
+import { Review } from 'database'
 import { Request } from 'express'
 import { AppError } from 'src/common/error'
 import { DatabaseService } from 'src/modules/database/database.service'
-import { WORKSPACE_REQUEST_KEY } from 'src/modules/workspace/guards/workspace-member-role.guard'
 
-export const REVIEW_REQUEST_KEY = 'review'
+export const THREAD_REQUEST_KEY = 'thread'
+
+export const ReqThread = createParamDecorator(
+  (_: unknown, ctx: ExecutionContext) => {
+    const request: Request = ctx.switchToHttp().getRequest()
+    return request[THREAD_REQUEST_KEY]
+  }
+)
 
 @Injectable()
-export class ReviewGuard implements CanActivate {
+export class ThreadGuard implements CanActivate {
   constructor(private readonly dbService: DatabaseService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest()
 
-    const params = plainToInstance(ReviewParamDTO, request.params)
+    const review: Review = request[REVIEW_REQUEST_KEY]
+    const params = plainToInstance(ThreadParamDTO, request.params)
 
     try {
       await validateOrReject(params)
@@ -32,26 +41,24 @@ export class ReviewGuard implements CanActivate {
       throw new BadRequestException(err)
     }
 
-    const workspace: Workspace = request[WORKSPACE_REQUEST_KEY]
-
-    const review = await this.dbService.review.findFirst({
+    const thread = await this.dbService.thread.findFirst({
       where: {
-        id: params.reviewId,
-        workspaceId: workspace.id,
+        id: params.threadId,
+        reviewId: review.id,
       },
     })
 
-    if (!review) {
+    if (!thread) {
       throw new NotFoundException(
         new AppError({
-          code: 'not_found_review',
-          description: `Review with id ${params.reviewId} not found`,
+          code: 'not_found_thread',
+          description: `Thread with id ${params.threadId} not found`,
           status: HttpStatus.NOT_FOUND,
         })
       )
     }
 
-    request[REVIEW_REQUEST_KEY] = review
+    request[THREAD_REQUEST_KEY] = thread
 
     return true
   }

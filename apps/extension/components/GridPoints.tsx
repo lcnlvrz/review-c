@@ -1,8 +1,6 @@
 import { PointMarker, type MarkerPoint } from './PointMarker'
 import { StagedPoint, StagedPointListener } from './StagedPoint'
 import type { ThreadPopulated } from 'common'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
 import { useCallback, useEffect, useState } from 'react'
 import { queryDomElemXPath } from '~lib/query-dom-elem-xpath'
 import { useReview } from '~providers/ReviewProvider'
@@ -23,15 +21,14 @@ export const GridPoints = (props: { threads: ThreadPopulated[] }) => {
 
   const iterateReviewThreads = useCallback(
     (threads: ThreadPopulated[] = []) => {
-      return threads.map((t) => {
-        const pointCalculated = recalculatePoint(t.point)
-
-        const [starterMessage] = t.messages
+      return threads.map((thread) => {
+        const pointCalculated = recalculatePoint(thread.point)
 
         return {
           ...pointCalculated,
-          message: starterMessage,
-          createdAt: t.createdAt,
+          messages: thread.messages,
+          createdAt: thread.createdAt,
+          threadId: thread.id,
         }
       })
     },
@@ -76,7 +73,8 @@ export const GridPoints = (props: { threads: ThreadPopulated[] }) => {
 
   useEffect(() => {
     setCommittedPoints(iterateReviewThreads(props.threads))
-  }, [props.threads.length])
+    console.log('recalculated commited points!')
+  }, [props.threads])
 
   useEffect(() => {
     return () => {
@@ -125,7 +123,7 @@ export const GridPoints = (props: { threads: ThreadPopulated[] }) => {
       {committedPoints
         .filter((c): c is Extract<MarkerPoint, { visible: true }> => c.visible)
         .map((p, index) => (
-          <PointMarker point={p} message={p.message} key={index} />
+          <PointMarker point={p} messages={p.messages} key={index} />
         ))}
     </div>
   )

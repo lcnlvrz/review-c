@@ -60,8 +60,6 @@ export class UserGuard implements CanActivate {
       },
     })
 
-    console.log('user', user)
-
     if (!user) {
       this.throwUnauthorized()
     }

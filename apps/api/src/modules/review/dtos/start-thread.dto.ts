@@ -1,15 +1,8 @@
-import {
-  IsArray,
-  IsJWT,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator'
+import { AddMessageDTO } from './add-message.dto'
+import { IsNumber, IsString, Max, Min } from 'class-validator'
 import { StartThreadInput } from 'common'
 
-export class CreateThreadDTO implements StartThreadInput {
+export class CreateThreadDTO extends AddMessageDTO implements StartThreadInput {
   @IsNumber()
   @Min(0)
   @Max(100)
@@ -22,14 +15,6 @@ export class CreateThreadDTO implements StartThreadInput {
 
   @IsString()
   xPath: string
-
-  @IsString()
-  message: string
-
-  @IsArray()
-  @IsString({ each: true })
-  @IsJWT({ each: true })
-  files: string[] = []
 
   @IsNumber()
   @Min(0)

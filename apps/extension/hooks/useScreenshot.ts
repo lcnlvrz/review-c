@@ -102,11 +102,14 @@ export const useScreenshot = () => {
     setScreenshots((screenshots) => screenshots.concat([screenshot]))
   }, [])
 
+  const clearScreenshots = useCallback(() => setScreenshots([]), [])
+
   return {
     screenshots,
     takeScreenshot,
     removeScreenshot,
     uploadScreenshot,
     addScreenshot,
+    clearScreenshots,
   }
 }

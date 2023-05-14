@@ -26,7 +26,9 @@ export const ReviewToolkit = () => {
       }}
     >
       <WaitForQuery query={query}>
-        {({ data }) => <GridPoints threads={data?.threads} />}
+        {({ data }) => {
+          return <GridPoints threads={data?.threads} />
+        }}
       </WaitForQuery>
       {ctx.cursorFocused && <Cursor />}
       <div

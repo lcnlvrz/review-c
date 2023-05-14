@@ -1,5 +1,6 @@
-import { ImageGallery } from './ImageGallery'
 import { InspectElements } from './InspectElements'
+import { MessageContainer } from './Message'
+import { MessageInput } from './MessageInput'
 import { PointMarker, type MarkerPoint } from './PointMarker'
 import { Textarea } from './Textarea'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,7 +16,6 @@ import { useDisclosure } from '~hooks/useDisclosure'
 import { buildReviewDetailQueryKey } from '~hooks/useReviewDetail'
 import { useScreenshot } from '~hooks/useScreenshot'
 import { getXPath } from '~lib/get-xpath'
-import { isExtensionDOM } from '~lib/is-extension-dom'
 import { cn } from '~lib/utils'
 import { useReview } from '~providers/ReviewProvider'
 import { pointSchema, type PointSchema } from '~schemas/point.schema'
@@ -30,13 +30,7 @@ export const StagedPoint = (props: {
 
   const [isLoading, setIsLoading] = useState(false)
 
-  const {
-    takeScreenshot,
-    removeScreenshot,
-    screenshots,
-    uploadScreenshot,
-    addScreenshot,
-  } = useScreenshot()
+  const screenshotsCtrl = useScreenshot()
 
   const methods = useForm<PointSchema>({
     resolver: zodResolver(pointSchema),
@@ -54,43 +48,6 @@ export const StagedPoint = (props: {
 
   const inspectElementsCtrl = useDisclosure()
 
-  const startInspectingElements = useCallback(() => {
-    ctx.blurCursor()
-    ctx.hideAbsoluteElements()
-    inspectElementsCtrl.onOpen()
-  }, [])
-
-  const stopInspectingElements = useCallback(() => {
-    ctx.blurCursor()
-    ctx.showAbsoluteElements()
-    inspectElementsCtrl.onClose()
-  }, [])
-
-  const onUploadImage = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (event.target.files?.length) {
-        const images = Array.from(event.target.files).filter((file) =>
-          file.type.includes('image')
-        )
-
-        await Promise.all(
-          images.map(async (image) => {
-            addScreenshot({
-              isLoading: true,
-              progress: 0,
-              name: image.name,
-              src: URL.createObjectURL(image),
-              token: '',
-            })
-
-            await uploadScreenshot(image)
-          })
-        )
-      }
-    },
-    []
-  )
-
   const onStartThread = useCallback(
     (data: PointSchema) => {
       setIsLoading(true)
@@ -105,7 +62,9 @@ export const StagedPoint = (props: {
             yPercentage: props.stagedPoint.yPercentage,
             xPercentage: props.stagedPoint.xPercentage,
             xPath: props.stagedPoint.xPath,
-            files: screenshots.map((screenshot) => screenshot.token),
+            files: screenshotsCtrl.screenshots.map(
+              (screenshot) => screenshot.token
+            ),
             message: data.message,
           }
         )
@@ -118,90 +77,40 @@ export const StagedPoint = (props: {
         })
         .finally(() => setIsLoading(false))
     },
-    [ctx.reviewSession, screenshots.length]
+    [ctx.reviewSession, screenshotsCtrl.screenshots.length]
   )
 
   return (
     <div>
       {ctx.mustShowAbsoluteElements && props.stagedPoint.visible && (
         <div>
-          <PointMarker point={props.stagedPoint} isStagedPoint />
+          <PointMarker messages={[]} point={props.stagedPoint} isStagedPoint />
           <div
             style={{
               transform: `translate(${props.stagedPoint.left + 68}px, ${
                 props.stagedPoint.top
               }px)`,
             }}
-            className={cn(
-              `absolute bg-white p-3 border-gray-400 min-w-full max-w-[20rem] border shadow-lg rounded-2xl`
-            )}
+            className="absolute"
           >
-            <Textarea
-              {...methods.register('message')}
-              className="min-w-[15rem] h-28 border-none p-2 bg-white text-black focus:outline-0 text-sm focus:ring-0 focus:border-transparent resize-none"
-            />
-
-            <ImageGallery onRemove={removeScreenshot} images={screenshots} />
-
-            <div className="w-full flex justify-between mt-5">
-              <div className="flex flex-row items-center space-x-3">
-                <div className="relative group cursor-pointer">
-                  <div className="absolute top-0 cursor-pointer">
-                    <input
-                      accept="image/*"
-                      className="opacity-0 w-full cursor-pointer"
-                      id="file"
-                      type="file"
-                      multiple
-                      onChange={onUploadImage}
-                    />
-                  </div>
-
-                  <button
-                    onClick={removeScreenshot}
-                    title="Add files"
-                    className="group-hover:bg-primary group rounded-full p-1 transition-all"
-                  >
-                    <Plus className="text-gray-500 group-hover:text-white w-[20px] text-xs" />
-                  </button>
-                </div>
-
-                <button
-                  onClick={startInspectingElements}
-                  title="Take a screenshot"
-                  className="hover:bg-primary group rounded-full p-1 transition-all"
-                >
-                  <Camera className="text-gray-500 group-hover:text-white w-[20px] text-xs" />
-                </button>
-              </div>
-
-              <button
-                onClick={() => onStartThread(methods.getValues())}
-                disabled={
-                  screenshots.some((s) => s.isLoading) ||
-                  methods.formState.isSubmitting
-                }
-                title="Send comment"
-                className="hover:bg-primary rounded-full group p-1 transition-all "
-              >
-                <Send className="text-gray-500 w-[20px] text-xs group-hover:text-white" />
-              </button>
-            </div>
+            <MessageContainer>
+              <MessageInput
+                className="rounded-t-2xl !p-3"
+                onSubmit={onStartThread}
+                formCtrl={methods}
+                inspectElementsCtrl={inspectElementsCtrl}
+                point={props.stagedPoint}
+                screenshotsCtrl={screenshotsCtrl}
+              />
+            </MessageContainer>
           </div>
         </div>
       )}
 
       {inspectElementsCtrl.isOpen && (
         <InspectElements
-          onSelectElement={(event) => {
-            if (isExtensionDOM(event.target as HTMLElement)) {
-              return
-            }
-
-            stopInspectingElements()
-
-            takeScreenshot(event.target as HTMLElement)
-          }}
+          onClose={inspectElementsCtrl.onClose}
+          onSelectElement={screenshotsCtrl.takeScreenshot}
         />
       )}
     </div>
@@ -228,6 +137,8 @@ export const StagedPointListener = (props: {
   }, [])
 
   const handleMouseClick = useCallback((event: MouseEvent) => {
+    console.log('mouse click!', event)
+
     event.stopPropagation()
 
     if (ref.current) {
@@ -263,12 +174,7 @@ export const StagedPointListener = (props: {
         top: event.pageY,
         left: event.pageX,
         createdBy: ctx.auth,
-        message: {
-          content: '',
-          sentBy: ctx.auth,
-          createdAt: new Date(),
-          sentById: ctx.auth.id,
-        },
+        messages: [],
         createdAt: new Date(),
       }
 
@@ -298,7 +204,7 @@ export const StagedPointListener = (props: {
 
   return (
     <div>
-      <PointMarker point={props.stagedPoint} isStagedPoint />
+      <PointMarker messages={[]} point={props.stagedPoint} isStagedPoint />
       <div
         ref={ref}
         style={{

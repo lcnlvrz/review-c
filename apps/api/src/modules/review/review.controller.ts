@@ -3,46 +3,66 @@ import { UserGuard } from '../auth/guards/user.guard'
 import { ReqWorkspace } from '../workspace/decorators/workspace.decorator'
 import { WorkspaceGuard } from '../workspace/guards/workspace.guard'
 import { ReqReview } from './decorators/review.decorator'
+import { AddMessageDTO } from './dtos/add-message.dto'
+import { CreateThreadDTO } from './dtos/start-thread.dto'
 import { ReviewGuard } from './guards/review.guard'
+import { ReqThread, ThreadGuard } from './guards/thread.guard'
 import {
   CreateReviewPipe,
   CreateReviewPipeOutput,
 } from './pipes/create-review.pipe'
-import {
-  StartReviewThreadPipe,
-  StartReviewThreadPipeOutput,
-} from './pipes/start-review-thread.pipe'
 import { ReviewService } from './review.service'
+import { Body, Controller, Get, Headers, Post, UseGuards } from '@nestjs/common'
+import { Review, Thread, User, Workspace } from 'database'
 import {
-  Body,
-  Controller,
-  Get,
-  Header,
-  Headers,
-  Post,
-  UseGuards,
-} from '@nestjs/common'
-import { Review, User, Workspace } from 'database'
+  FileTokenClaims,
+  FileTokensGuard,
+  ReqFileTokensClaims,
+} from 'src/common/guards/file-tokens.guard'
 
 @Controller('workspace')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   @Post(':workspaceId/review/:reviewId/thread')
-  @UseGuards(UserGuard, WorkspaceGuard, ReviewGuard)
+  @UseGuards(UserGuard, WorkspaceGuard, ReviewGuard, FileTokensGuard)
   async addThreadToReview(
-    @Body(StartReviewThreadPipe) dto: StartReviewThreadPipeOutput,
+    @ReqFileTokensClaims() files: FileTokenClaims[],
+    @Body() dto: CreateThreadDTO,
     @ReqUser() user: User,
     @ReqWorkspace() workspace: Workspace,
     @ReqReview() review: Review,
     @Headers('user-agent') userAgent: string
   ) {
     return await this.reviewService.startThread({
+      files,
       userAgent,
       dto,
       review,
       user,
       workspace,
+    })
+  }
+
+  @Post(':workspaceId/review/:reviewId/thread/:threadId/message')
+  @UseGuards(
+    UserGuard,
+    WorkspaceGuard,
+    ReviewGuard,
+    FileTokensGuard,
+    ThreadGuard
+  )
+  async addMessageToThread(
+    @ReqFileTokensClaims() files: FileTokenClaims[],
+    @Body() dto: AddMessageDTO,
+    @ReqUser() user: User,
+    @ReqThread() thread: Thread
+  ) {
+    return await this.reviewService.addMessageToThread({
+      dto,
+      files,
+      thread,
+      user,
     })
   }
 

@@ -53,8 +53,6 @@ export class WorkspaceGuard implements CanActivate {
       },
     })
 
-    console.log('workspace', workspace)
-
     if (!workspace) {
       throw new NotFoundException(
         new AppError({

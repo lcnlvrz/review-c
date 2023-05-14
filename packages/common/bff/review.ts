@@ -10,6 +10,11 @@ export interface StartThreadInput {
   files: string[]
 }
 
+export interface AddMessageToThreadInput {
+  message: string
+  files: string[]
+}
+
 export interface CreateReviewInput {
   type: 'FILE' | 'URL'
   file?: string | undefined | null

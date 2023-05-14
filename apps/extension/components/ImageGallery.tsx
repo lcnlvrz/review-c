@@ -1,30 +1,23 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-} from './Dialog'
+import { Dialog, DialogContent, DialogDescription } from './Dialog'
 import { Progress } from './Progress'
 import { Slider } from './Slider'
-import { PORTAL_ID } from './WaitForHost'
 import { Button } from './button/button'
 import { ChevronLeft, ChevronRight, Minus, Plus, X } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import Draggable from 'react-draggable'
 import { getContentShadowDomRef } from '~lib/get-content-shadow-dom-ref'
-import { EXTENSION_SHADOW_ROOT_CONTAINER_TAG_NAME } from '~lib/is-extension-dom'
 import { cn } from '~lib/utils'
 import { useReview } from '~providers/ReviewProvider'
 
 interface Image {
   src: string
   isLoading?: boolean
-  progress: number
+  progress?: number
 }
 
 const ImagePreview = (
   props: Image & {
-    onRemove: () => void
+    onRemove?: () => void
     onFocusImage: () => void
   }
 ) => {
@@ -39,15 +32,17 @@ const ImagePreview = (
         </div>
       )}
 
-      <div className="absolute -top-3 -right-3">
-        <Button
-          onClick={() => props.onRemove()}
-          size="xs"
-          className="bg-white group shadow-lg rounded-full border border-gray-100"
-        >
-          <X className="w-3 h-3 group-hover:fill-white group-hover:text-white" />
-        </Button>
-      </div>
+      {props.onRemove && (
+        <div className="absolute -top-3 -right-3">
+          <Button
+            onClick={() => props.onRemove()}
+            size="xs"
+            className="bg-white group shadow-lg rounded-full border border-gray-100"
+          >
+            <X className="w-3 h-3 group-hover:fill-white group-hover:text-white" />
+          </Button>
+        </div>
+      )}
 
       <img
         onClick={props.onFocusImage}
@@ -68,7 +63,7 @@ const MAX_ZOOM_FACTOR = 3
 
 export const ImageGallery = (props: {
   images: Image[]
-  onRemove: (index: number) => void
+  onRemove?: (index: number) => void
 }) => {
   const [imageFocusIndex, setImageFocusIndex] = useState<number>()
 
@@ -131,7 +126,11 @@ export const ImageGallery = (props: {
               onFocusImage={() => {
                 setImageFocusIndex(index)
               }}
-              onRemove={() => props.onRemove(index)}
+              {...(props.onRemove
+                ? {
+                    onRemove: () => props.onRemove(index),
+                  }
+                : {})}
             />
           )
         })}

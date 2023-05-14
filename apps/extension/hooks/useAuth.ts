@@ -1,6 +1,6 @@
-import type { User } from '.prisma/client'
 import { sendToBackground } from '@plasmohq/messaging'
 import { useStorage } from '@plasmohq/storage/hook'
+import type { User } from 'database'
 import { useCallback, useState } from 'react'
 
 export const useAuth = () => {

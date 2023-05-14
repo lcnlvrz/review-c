@@ -1,3 +1,9 @@
+import { DatabaseService } from '../database/database.service'
+import { Emailer } from '../notification/emailer'
+import { CreateWorkspaceDTO } from './dtos/create-workspace.dto'
+import { InviteGuestsToWorkspaceDTO } from './dtos/invite-guests-to-workspace.dto'
+import { UpdateWorkspaceDTO } from './dtos/update-workspace.dto'
+import { INVITATION_JWT_SERVICE } from './invitation-jwt.module'
 import { Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
@@ -5,12 +11,7 @@ import { Transform } from 'class-transformer'
 import { IsEmail, IsString } from 'class-validator'
 import { Invitation, Member, MemberRole, User, Workspace } from 'database'
 import { normalizeString } from 'src/utils/normalize-string'
-import { DatabaseService } from '../database/database.service'
-import { Emailer } from '../notification/emailer'
-import { CreateWorkspaceDTO } from './dtos/create-workspace.dto'
-import { InviteGuestsToWorkspaceDTO } from './dtos/invite-guests-to-workspace.dto'
-import { UpdateWorkspaceDTO } from './dtos/update-workspace.dto'
-import { INVITATION_JWT_SERVICE } from './invitation-jwt.module'
+
 const nanoid = require('nanoid')
 
 export class JWTInvitationClaimsDTO {
@@ -117,13 +118,6 @@ export class WorkspaceService {
 
   async acceptInvitation(input: { invitation: Invitation; user: User }) {
     let memberId: number
-
-    console.log('user', {
-      workspaceId: input.invitation.workspaceId,
-      role: input.invitation.role,
-      invitationAcceptedAt: new Date(),
-      userId: input.user.id,
-    })
 
     await this.dbService.$transaction(async (db) => {
       await db.invitation.delete({

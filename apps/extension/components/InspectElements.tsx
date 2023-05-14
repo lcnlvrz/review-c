@@ -1,10 +1,16 @@
+import { Portal } from '@radix-ui/react-portal'
 import { useCallback, useEffect, useState } from 'react'
+import { getContentShadowDomRef } from '~lib/get-content-shadow-dom-ref'
 import { getXPath } from '~lib/get-xpath'
 import { isExtensionDOM } from '~lib/is-extension-dom'
+import { useReview } from '~providers/ReviewProvider'
 
 export const InspectElements = (props: {
-  onSelectElement: (event: MouseEvent) => void
+  onClose: () => void
+  onSelectElement: (element: HTMLElement) => void
 }) => {
+  const ctx = useReview()
+
   const [currentElement, setCurrentElement] = useState<{
     xPath: string
     top: number
@@ -32,21 +38,40 @@ export const InspectElements = (props: {
     })
   }, [])
 
+  const onSelectElement = useCallback((event: MouseEvent) => {
+    console.log('select element!', event)
+
+    if (isExtensionDOM(event.target as HTMLElement)) {
+      return
+    }
+
+    ctx.blurCursor()
+    ctx.showAbsoluteElements()
+
+    props.onSelectElement(event.target as HTMLElement)
+    props.onClose()
+  }, [])
+
   useEffect(() => {
-    window.addEventListener('click', props.onSelectElement)
+    window.addEventListener('click', onSelectElement)
     window.addEventListener('mousemove', handleMouseMove)
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('click', props.onSelectElement)
+      window.removeEventListener('click', onSelectElement)
     }
   }, [])
+
+  const portal = getContentShadowDomRef()
+
+  console.log('currentElement', currentElement)
 
   if (!currentElement) return null
 
   return (
-    <>
+    <Portal container={portal}>
       <div
+        id="inspect-elements"
         className="bg-red-500 bg-opacity-50"
         style={{
           pointerEvents: 'none',
@@ -56,6 +81,6 @@ export const InspectElements = (props: {
           width: `${currentElement.width}px`,
         }}
       />
-    </>
+    </Portal>
   )
 }

@@ -115,7 +115,7 @@ model ReviewUser {
 
 model Message {
   id        Int      @id @default(autoincrement())
-  content   String
+  content   String   @db.Text
   createdAt DateTime @default(now())
   sentBy    User     @relation(fields: [sentById], references: [id])
   sentById  Int

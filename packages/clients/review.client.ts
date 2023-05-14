@@ -1,5 +1,6 @@
 import { Client } from './client'
 import type {
+  AddMessageToThreadInput,
   ListReviewsOutput,
   RetrieveReviewDetailOutput,
   StartThreadInput,
@@ -25,6 +26,20 @@ export class ReviewClient extends Client {
   ) {
     return await this.httpClient
       .post(`/workspace/${workspaceId}/review/${reviewId}/thread`, data)
+      .then((res) => res.data as ListReviewsOutput)
+  }
+
+  async addMessageToThread(
+    workspaceId: string,
+    reviewId: string,
+    threadId: number,
+    data: AddMessageToThreadInput
+  ) {
+    return await this.httpClient
+      .post(
+        `/workspace/${workspaceId}/review/${reviewId}/thread/${threadId}/message`,
+        data
+      )
       .then((res) => res.data as ListReviewsOutput)
   }
 }

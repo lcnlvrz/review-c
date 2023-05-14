@@ -51,6 +51,17 @@ export class S3Provider {
     })
   }
 
+  async generatePresignedGetURL(input: {
+    key: string
+    expirationInSeconds: number
+  }) {
+    return await this.s3.getSignedUrl('getObject', {
+      Bucket: this.bucket,
+      Key: input.key,
+      Expires: input.expirationInSeconds,
+    })
+  }
+
   async getMetadataObject(storedKey: string): Promise<
     | {
         exists: true
