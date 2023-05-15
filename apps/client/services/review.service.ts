@@ -14,6 +14,11 @@ export class ReviewService {
 
   static async listReviews(
     workspaceId: string,
+    params: {
+      scope: 'all'
+    } = {
+      scope: 'all',
+    },
     cookie?: string
   ): Promise<ListReviewsOutput> {
     return await httpClient
@@ -21,6 +26,7 @@ export class ReviewService {
         headers: {
           cookie,
         },
+        params,
       })
       .then((res) => res.data)
   }

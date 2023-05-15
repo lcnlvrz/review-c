@@ -126,10 +126,11 @@ model Message {
 }
 
 model Point {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  createdBy    User     @relation(fields: [createdById], references: [id])
-  createdById  Int
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdById Int
+
   xPath        String
   xPercentage  Float
   yPercentage  Float
@@ -145,6 +146,8 @@ model Point {
 
 model Thread {
   id          Int       @id @default(autoincrement())
+  resolvedAt  DateTime?
+  pathname    String
   createdAt   DateTime  @default(now())
   messages    Message[]
   startedBy   User      @relation(fields: [startedById], references: [id])
@@ -161,12 +164,12 @@ model Thread {
 
 model Review {
   id          String       @id
-  type        ReviewType
   title       String
   token       String
   workspace   Workspace    @relation(fields: [workspaceId], references: [id])
   workspaceId String
-  url         String?
+  type        ReviewType
+  website     String?
   file        File?        @relation(fields: [fileId], references: [id])
   fileId      Int?
   users       ReviewUser[]
@@ -179,7 +182,7 @@ model Review {
 
 enum ReviewType {
   FILE
-  URL
+  WEBSITE
 }
 
 enum Provider {

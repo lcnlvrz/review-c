@@ -1,12 +1,13 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HttpClient } from 'clients'
-import type { User } from 'common'
-import cssText from 'data-text:~styles.css'
+import cssText from 'data-text:~/styles.css'
+import type { User } from 'database'
 import { useState } from 'react'
 import { ReviewToolkit } from '~components/ReviewToolkit'
 import { WaitForHost } from '~components/WaitForHost'
 import { useAuth } from '~hooks/useAuth'
 import { useReviewSession, type ReviewSession } from '~hooks/useReviewSession'
+import type { Host } from '~lib/resolve-host'
 import { HTTPClientProvider } from '~providers/HTTPClientProvider'
 import { ReviewProvider } from '~providers/ReviewProvider'
 
@@ -20,6 +21,7 @@ const Layout = (props: {
   auth: User
   token: string
   session: ReviewSession
+  host: Host
 }) => {
   const [httpClient] = useState(
     () =>
@@ -38,20 +40,27 @@ const Layout = (props: {
     <QueryClientProvider client={queryClient}>
       <HTTPClientProvider httpClient={httpClient}>
         <ReviewProvider auth={props.auth} session={props.session}>
-          <ReviewToolkit />
+          <ReviewToolkit host={props.host} />
         </ReviewProvider>
       </HTTPClientProvider>
     </QueryClientProvider>
   )
 }
 
-const Toolkit = (props: { host: string }) => {
-  const { currentReviewSession } = useReviewSession(props.host)
+const Toolkit = (props: { host: Host }) => {
+  const { currentReviewSession } = useReviewSession(props.host.host)
   const { token, auth } = useAuth()
 
   if (!currentReviewSession || !token) return null
 
-  return <Layout auth={auth} token={token} session={currentReviewSession} />
+  return (
+    <Layout
+      host={props.host}
+      auth={auth}
+      token={token}
+      session={currentReviewSession}
+    />
+  )
 }
 
 const content = () => {

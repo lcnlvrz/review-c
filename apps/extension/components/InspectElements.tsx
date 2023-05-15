@@ -39,8 +39,6 @@ export const InspectElements = (props: {
   }, [])
 
   const onSelectElement = useCallback((event: MouseEvent) => {
-    console.log('select element!', event)
-
     if (isExtensionDOM(event.target as HTMLElement)) {
       return
     }
@@ -63,8 +61,6 @@ export const InspectElements = (props: {
   }, [])
 
   const portal = getContentShadowDomRef()
-
-  console.log('currentElement', currentElement)
 
   if (!currentElement) return null
 

@@ -11,7 +11,7 @@ export const ReviewsList = (props: {
 }) => {
   const currentWorkspace = useAtomValue(currentWorkspaceAtom)
 
-  const { isLoading, data, error } = useQuery(
+  const { data } = useQuery(
     [REVIEWS_QUERY_KEY],
     () =>
       ReviewService.listReviews(currentWorkspace.id).then((res) => res.reviews),

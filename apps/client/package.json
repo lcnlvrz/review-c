@@ -19,6 +19,7 @@
     "tailwindcss": "^3.2.7"
   },
   "dependencies": {
+    "configs": "*",
     "@hookform/resolvers": "^3.0.0",
     "@next/font": "^13.2.4",
     "@radix-ui/react-alert-dialog": "^1.0.3",

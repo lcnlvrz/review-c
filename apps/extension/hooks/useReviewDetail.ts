@@ -1,12 +1,14 @@
 import { useAPI } from './useAPI'
 import { useQuery } from '@tanstack/react-query'
+import type { Host } from '~lib/resolve-host'
 import { useReview } from '~providers/ReviewProvider'
 
 export const buildReviewDetailQueryKey = (reviewId: string) => {
   return `review-${reviewId}`
 }
 
-export const useReviewDetail = () => {
+//TODO: remove host prop drilling and distribute host via context
+export const useReviewDetail = (props: { host: Host }) => {
   const reviewAPI = useAPI('review')
   const ctx = useReview()
 
@@ -15,7 +17,8 @@ export const useReviewDetail = () => {
     () => {
       return reviewAPI.retrieveReviewDetail(
         ctx.reviewSession.workspace.id,
-        ctx.reviewSession.review.id
+        ctx.reviewSession.review.id,
+        props.host.pathname
       )
     }
   )

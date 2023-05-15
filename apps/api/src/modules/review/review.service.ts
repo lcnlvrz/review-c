@@ -1,6 +1,8 @@
 import { DatabaseService } from '../database/database.service'
+import { FileService } from '../file/file.service'
 import { S3Provider } from '../file/providers/s3.provider'
 import { AddMessageDTO } from './dtos/add-message.dto'
+import { ListReviewsQueryParamsDTO } from './dtos/list-reviews-query-params.dto'
 import { CreateThreadDTO } from './dtos/start-thread.dto'
 import { CreateReviewPipeOutput } from './pipes/create-review.pipe'
 import { Injectable } from '@nestjs/common'
@@ -11,9 +13,10 @@ import {
   getUserAgentSpecs,
 } from 'common'
 import * as crypto from 'crypto'
-import { Review, Thread, User, Workspace } from 'database'
+import { Message, Review, Thread, User, Workspace } from 'database'
 import { FileTokenClaims } from 'src/common/guards/file-tokens.guard'
 import { POST_PRESIGNED_URL_EXPIRATION_SECONDS } from 'src/constants/file'
+import { safeURLParse } from 'src/utils/safe-url-parse'
 
 const nanoid = require('nanoid')
 
@@ -21,13 +24,14 @@ const nanoid = require('nanoid')
 export class ReviewService {
   constructor(
     private readonly dbService: DatabaseService,
-    private readonly s3: S3Provider
+    private readonly s3: S3Provider,
+    private readonly fileService: FileService
   ) {}
 
   async addMessageToThread(input: {
     user: User
-    dto: AddMessageDTO
     thread: Thread
+    dto: AddMessageDTO
     files: FileTokenClaims[]
   }) {
     await this.dbService.thread.update({
@@ -60,12 +64,14 @@ export class ReviewService {
     review: Review
     dto: CreateThreadDTO
     userAgent: string
+    origin: string
     files: FileTokenClaims[]
   }) {
     const specs = getUserAgentSpecs(input.userAgent)
 
     const thread = await this.dbService.thread.create({
       data: {
+        pathname: input.dto.pathname,
         point: {
           create: {
             isMobile: specs.isMobile,
@@ -137,10 +143,10 @@ export class ReviewService {
             }
           }
 
-          case 'URL':
+          case 'WEBSITE':
             return {
               type: input.type,
-              url: input.url,
+              website: new URL(input.website).origin,
             }
         }
       })()
@@ -156,7 +162,7 @@ export class ReviewService {
           workspaceId: workspace.id,
           id: nanoid.nanoid(),
           fileId: fields.fileId,
-          url: fields.url,
+          website: fields.website,
           type: fields.type,
           users: {
             create: {
@@ -176,10 +182,18 @@ export class ReviewService {
     }
   }
 
-  async listReviews(workspace: Workspace): Promise<ListReviewsOutput> {
+  async listReviews(input: {
+    workspace: Workspace
+    query: ListReviewsQueryParamsDTO
+  }): Promise<ListReviewsOutput> {
     const reviews = await this.dbService.review.findMany({
       where: {
-        workspaceId: workspace.id,
+        workspaceId: input.workspace.id,
+        ...(input.query.website
+          ? {
+              website: input.query.website,
+            }
+          : {}),
       },
       include: {
         users: true,
@@ -191,14 +205,18 @@ export class ReviewService {
     }
   }
 
-  async retrieveReviewDetail(reviewId: string) {
+  async retrieveReviewDetail(input: { reviewId: string; pathname: string }) {
     return await this.dbService.review
       .findFirst({
         where: {
-          id: reviewId,
+          id: input.reviewId,
         },
         include: {
           threads: {
+            where: {
+              resolvedAt: null,
+              pathname: input.pathname,
+            },
             include: {
               point: {
                 include: {
@@ -222,13 +240,16 @@ export class ReviewService {
               thread.messages.map(async (message) => {
                 message.files = await Promise.all(
                   message.files.map(async (file) => {
-                    console.log('file.storedKey', file.storedKey)
                     return {
                       ...file,
                       src: await this.s3.generatePresignedGetURL({
                         key: file.storedKey,
                         expirationInSeconds:
                           POST_PRESIGNED_URL_EXPIRATION_SECONDS,
+                      }),
+                      token: this.fileService.generateFileToken({
+                        storedKey: file.storedKey,
+                        filename: file.originalFilename,
                       }),
                     }
                   })
@@ -244,5 +265,53 @@ export class ReviewService {
 
         return review
       })
+  }
+
+  async deleteThread(input: { thread: Thread }) {
+    await this.dbService.thread.delete({
+      where: {
+        id: input.thread.id,
+      },
+    })
+  }
+
+  async deleteMessageFromThread(input: { message: Message }) {
+    await this.dbService.message.delete({
+      where: {
+        id: input.message.id,
+      },
+    })
+  }
+
+  async updateMessage(input: {
+    message: Message
+    dto: AddMessageDTO
+    files: FileTokenClaims[]
+  }) {
+    await this.dbService.$transaction(async (trx) => {
+      const files = await Promise.all(
+        input.files.map(async (file) => {
+          return await trx.file.create({
+            data: {
+              originalFilename: file.originalFilename,
+              size: file.size,
+              storedKey: file.storedKey,
+            },
+          })
+        })
+      )
+
+      await trx.message.update({
+        where: {
+          id: input.message.id,
+        },
+        data: {
+          content: input.dto.message,
+          files: {
+            set: files.map((file) => ({ id: file.id })),
+          },
+        },
+      })
+    })
   }
 }

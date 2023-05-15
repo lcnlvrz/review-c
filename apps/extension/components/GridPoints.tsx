@@ -29,6 +29,7 @@ export const GridPoints = (props: { threads: ThreadPopulated[] }) => {
           messages: thread.messages,
           createdAt: thread.createdAt,
           threadId: thread.id,
+          startedById: thread.startedById,
         }
       })
     },

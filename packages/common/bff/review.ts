@@ -1,6 +1,7 @@
 import type { Thread, User } from 'db'
 
 export interface StartThreadInput {
+  pathname: string
   windowHeight: number
   windowWidth: number
   xPath: string
@@ -16,9 +17,9 @@ export interface AddMessageToThreadInput {
 }
 
 export interface CreateReviewInput {
-  type: 'FILE' | 'URL'
+  type: 'FILE' | 'WEBSITE'
   file?: string | undefined | null
-  url?: string | undefined | null
+  website?: string | undefined | null
 }
 
 export interface CreateReviewOutput {
@@ -44,8 +45,8 @@ export interface File {
 export interface Review {
   title: string
   id: string
-  type: 'FILE' | 'URL'
-  url?: string
+  type: 'FILE' | 'WEBSITE'
+  website?: string
   file?: File
   users: ReviewUser[]
 }

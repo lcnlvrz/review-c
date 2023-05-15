@@ -1,10 +1,11 @@
 import { Skeleton } from './Skeleton'
 import { FolderEdit } from 'lucide-react'
 import { useReviewSession } from '~hooks/useReviewSession'
+import type { Host } from '~lib/resolve-host'
 
-export const SignOutReviewSession = (props: { host: string }) => {
+export const SignOutReviewSession = (props: { host: Host }) => {
   const { currentReviewSession, stopReviewSession } = useReviewSession(
-    props.host
+    props.host.host
   )
 
   if (!currentReviewSession) {
@@ -20,8 +21,8 @@ export const SignOutReviewSession = (props: { host: string }) => {
 
       <div className="grid grid-cols-1 gap-4">
         <div>
-          <h2 className="font-bold">Host</h2>
-          <p className="truncate max-w-xl">{props.host}</p>
+          <h2 className="font-bold">Website</h2>
+          <p className="truncate max-w-xl">{props.host.host}</p>
         </div>
         <div>
           <h2 className="font-bold">Workspace</h2>

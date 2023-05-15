@@ -35,8 +35,6 @@ export class HttpClient {
   ): Promise<FetchResponse<T>> {
     const url = `${this.baseUrl}${path}`
 
-    console.log('headers', this.headers)
-
     const params = {
       method: options.method,
       headers: {
@@ -124,7 +122,7 @@ export class HttpClient {
 
   async put<T>(
     path: string,
-    body?: Record<string, unknown>,
+    body?: Record<string, unknown> | object,
     headers?: Record<string, string>
   ): Promise<FetchResponse<T>> {
     const options = {

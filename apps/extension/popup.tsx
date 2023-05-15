@@ -8,16 +8,17 @@ import './styles.css'
 import { API_BASE_URL, HttpClient } from 'clients'
 import { SignOutReviewSession } from '~components/SignOutReviewSession'
 import { useReviewSession } from '~hooks/useReviewSession'
+import type { Host } from '~lib/resolve-host'
 import { HTTPClientProvider } from '~providers/HTTPClientProvider'
 
-const Layout = (props: { host: string; token: string }) => {
+const Layout = (props: { host: Host; token: string }) => {
   const [httpClient] = useState(
     new HttpClient(API_BASE_URL, {
       Cookie: `review-c_session=${props.token}`,
     })
   )
 
-  const { currentReviewSession } = useReviewSession(props.host)
+  const { currentReviewSession } = useReviewSession(props.host.host)
 
   return (
     <HTTPClientProvider httpClient={httpClient}>
@@ -30,7 +31,7 @@ const Layout = (props: { host: string; token: string }) => {
   )
 }
 
-const ToggleReview = (props: { host: string }) => {
+const ToggleReview = (props: { host: Host }) => {
   const { auth, requestSignIn, token } = useAuth()
 
   return (

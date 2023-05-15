@@ -15,6 +15,7 @@ import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import { useReviewSession } from '~hooks/useReviewSession'
 import { useReviews } from '~hooks/useReviews'
 import { useWorkspaces } from '~hooks/useWorkspaces'
+import type { Host } from '~lib/resolve-host'
 import { reviewSchema, type ReviewSchema } from '~schemas/review.schema'
 
 export type DeepRequired<T> = {
@@ -60,11 +61,12 @@ const WorkspaceSelect = () => {
   )
 }
 
-const ReviewSelect = () => {
+const ReviewSelect = (props: { host: Host }) => {
   const methods = useReviewForm()
 
   const query = useReviews({
     workspaceId: methods.getValues().workspace.id,
+    host: props.host,
   })
 
   return (
@@ -98,11 +100,11 @@ const ReviewSelect = () => {
   )
 }
 
-const Form = (props: { host: string }) => {
+const Form = (props: { host: Host }) => {
   const methods = useReviewForm()
   const fields = methods.watch()
 
-  const { startReviewSession } = useReviewSession(props.host)
+  const { startReviewSession } = useReviewSession(props.host.host)
 
   const onSubmit = useCallback((data: DeepRequired<ReviewSchema>) => {
     startReviewSession(data)
@@ -115,7 +117,7 @@ const Form = (props: { host: string }) => {
     >
       <div className="flex flex-col space-y-5">
         <WorkspaceSelect />
-        {fields.workspace && <ReviewSelect />}
+        {fields.workspace && <ReviewSelect host={props.host} />}
       </div>
 
       <div>
@@ -128,7 +130,7 @@ const Form = (props: { host: string }) => {
   )
 }
 
-export const SignInReviewSession = (props: { host: string }) => {
+export const SignInReviewSession = (props: { host: Host }) => {
   const methods = useForm<ReviewSchema>({
     resolver: zodResolver(reviewSchema),
   })

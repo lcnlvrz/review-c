@@ -10,10 +10,10 @@ interface Screenshot {
   token: string
 }
 
-export const useScreenshot = () => {
+export const useScreenshot = (initialValue: Screenshot[] = []) => {
   const fileAPI = useAPI('file')
 
-  const [screenshots, setScreenshots] = useState<Screenshot[]>([])
+  const [screenshots, setScreenshots] = useState<Screenshot[]>(initialValue)
 
   const uploadScreenshot = useCallback((file: File) => {
     fileAPI

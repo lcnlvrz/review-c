@@ -1,4 +1,4 @@
-export const reviewTypes = ['URL', 'FILE'] as const
+export const reviewTypes = ['WEBSITE', 'FILE'] as const
 
 export type ReviewType = (typeof reviewTypes)[number]
 
@@ -8,8 +8,8 @@ export const reviewTypesOpts: {
   context: string
 }[] = [
   {
-    type: 'URL',
-    label: 'URL',
+    type: 'WEBSITE',
+    label: 'Website',
     context: 'Review a website',
   },
   {

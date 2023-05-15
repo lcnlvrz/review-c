@@ -13,15 +13,15 @@ const fileSchema = z.object({
   file: z.string(),
 })
 
-const urlSchema = z.object({
+const websiteSchema = z.object({
   title: props.title,
-  type: z.literal(typeEnum.enum.URL),
-  url: z.string().url(),
+  type: z.literal(typeEnum.enum.WEBSITE),
+  website: z.string().url(),
 })
 
 export const reviewSchema = z.discriminatedUnion('type', [
   fileSchema,
-  urlSchema,
+  websiteSchema,
 ])
 
 export type ReviewSchema = z.infer<typeof reviewSchema>

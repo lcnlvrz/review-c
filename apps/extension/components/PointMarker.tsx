@@ -29,6 +29,7 @@ interface CommonPointProps<TVisible extends boolean = true>
   extends Omit<Point, 'id' | 'createdById'> {
   createdAt: Date
   createdBy: User
+  startedById?: number
   threadId?: number
   visible: TVisible
   xPath: string
@@ -143,6 +144,7 @@ export const PointMarker = (props: {
               container={getContentShadowDomRef()}
             >
               <Thread
+                startedById={props.point.startedById}
                 threadId={props.point.threadId}
                 messages={props.messages}
                 point={props.point}

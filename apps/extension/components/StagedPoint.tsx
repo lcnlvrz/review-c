@@ -66,6 +66,7 @@ export const StagedPoint = (props: {
               (screenshot) => screenshot.token
             ),
             message: data.message,
+            pathname: window.location.pathname,
           }
         )
         .then(() => {

@@ -10,14 +10,17 @@ import { WaitForQuery } from './WaitForQuery'
 import { MessageCircle } from 'lucide-react'
 import { useRef } from 'react'
 import { useReviewDetail } from '~hooks/useReviewDetail'
+import type { Host } from '~lib/resolve-host'
 import { cn } from '~lib/utils'
 import { useReview } from '~providers/ReviewProvider'
 
-export const ReviewToolkit = () => {
+export const ReviewToolkit = (props: { host: Host }) => {
   const ref = useRef<HTMLDivElement>()
   const ctx = useReview()
 
-  const query = useReviewDetail()
+  const query = useReviewDetail({
+    host: props.host,
+  })
 
   return (
     <div

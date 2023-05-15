@@ -26,17 +26,22 @@ export class FileService {
       key: storedKey,
     })
 
-    const claims: PresignedFilePostTokenClaimsDTO = {
-      storedKey,
-      originalFilename: dto.filename,
-    }
-
-    const token = this.jwtService.sign(claims)
-
     return {
       ...presignedPOST,
-      token,
+      token: this.generateFileToken({
+        filename: dto.filename,
+        storedKey,
+      }),
     }
+  }
+
+  public generateFileToken(input: { storedKey: string; filename: string }) {
+    const claims: PresignedFilePostTokenClaimsDTO = {
+      storedKey: input.storedKey,
+      originalFilename: input.filename,
+    }
+
+    return this.jwtService.sign(claims)
   }
 
   private normalizeFilename(filename: string): string {

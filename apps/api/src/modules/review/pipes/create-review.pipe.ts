@@ -31,8 +31,8 @@ export type CreateReviewPipeOutput =
     }
   | {
       title: string
-      type: 'URL'
-      url: string
+      type: 'WEBSITE'
+      website: string
     }
 
 @Injectable()
@@ -91,9 +91,9 @@ export class CreateReviewPipe implements PipeTransform {
         }
       }
 
-      case 'URL': {
+      case 'WEBSITE': {
         try {
-          await firstValueFrom(this.httpService.get(dto.url))
+          await firstValueFrom(this.httpService.get(dto.website))
         } catch (err) {
           throw new AppError({
             code: 'url_not_found',
@@ -104,8 +104,8 @@ export class CreateReviewPipe implements PipeTransform {
 
         return {
           title: dto.title,
-          type: 'URL',
-          url: dto.url,
+          type: 'WEBSITE',
+          website: dto.website,
         }
       }
     }

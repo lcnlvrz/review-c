@@ -1,10 +1,3 @@
-import { ReviewType, reviewTypesOpts } from '@/constants/review'
-import { useDisclosure } from '@/hooks/useDisclosure'
-import { ReviewSchema, reviewSchema } from '@/schemas/review.schema'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Label } from '@radix-ui/react-dropdown-menu'
-import { Plus } from 'lucide-react'
-import { FormProvider, useForm } from 'react-hook-form'
 import { Button } from './Button'
 import {
   Dialog,
@@ -26,13 +19,20 @@ import {
 import { TextErrorMessage } from './TextErrorMessage'
 import { TextHelperMessage } from './TextHelperMessage'
 import { UploadFile } from './UploadFile'
-import { useCallback, useState } from 'react'
-import { ReviewService } from '@/services/review.service'
+import { useCurrentWorkspace } from '@/atoms/pageProps'
+import { REVIEWS_QUERY_KEY } from '@/constants/query-keys'
+import { ReviewType, reviewTypesOpts } from '@/constants/review'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import { useError } from '@/hooks/useError'
 import { useToast } from '@/hooks/useToast'
+import { ReviewSchema, reviewSchema } from '@/schemas/review.schema'
+import { ReviewService } from '@/services/review.service'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Label } from '@radix-ui/react-dropdown-menu'
 import { useQueryClient } from '@tanstack/react-query'
-import { REVIEWS_QUERY_KEY } from '@/constants/query-keys'
-import { useCurrentWorkspace } from '@/atoms/pageProps'
+import { Plus } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 
 const Body = (props: { onClose: () => void }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -128,17 +128,26 @@ const Body = (props: { onClose: () => void }) => {
           </TextErrorMessage>
         )}
 
-        {fields.type === 'URL' && (
+        {fields.type === 'WEBSITE' && (
           <div>
-            <Label>URL</Label>
-            <Input
-              placeholder="https://example.com"
-              {...methods.register('url')}
-            />
-            {'url' in methods.formState.errors &&
-            methods.formState.errors.url ? (
+            <Label>Website</Label>
+            <div className="flex flex-row items-center">
+              <span className="bg-gray-100 flex h-10 rounded-l-md border border-slate-200 py-2 px-3 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-50 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-900 ">
+                https://
+              </span>
+              <Input
+                className="rounded-l-none"
+                placeholder="baratin.lcnlvrz.com"
+                {...methods.register('website', {
+                  setValueAs: (val) => `https://${val}`,
+                })}
+              />
+            </div>
+
+            {'website' in methods.formState.errors &&
+            methods.formState.errors.website ? (
               <TextErrorMessage>
-                {methods.formState.errors.url.message}
+                {methods.formState.errors.website.message}
               </TextErrorMessage>
             ) : (
               <TextHelperMessage>

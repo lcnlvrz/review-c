@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react"
-
-import { resolveHost } from "~lib/resolve-host"
+import { useEffect, useState } from 'react'
+import { resolveHost, type Host } from '~lib/resolve-host'
 
 export const useHost = () => {
   const [isLoading, setIsLoading] = useState(true)
-  const [host, setHost] = useState("")
+  const [host, setHost] = useState<Host>()
 
   useEffect(() => {
     resolveHost().then((res) => {
@@ -16,6 +15,6 @@ export const useHost = () => {
   return {
     host,
     setHost,
-    isLoading
+    isLoading,
   }
 }

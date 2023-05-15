@@ -1,16 +1,3 @@
-import { useAuth } from '@/hooks/useAuth'
-import { useDisclosure } from '@/hooks/useDisclosure'
-import { useError } from '@/hooks/useError'
-import { useWorkspace } from '@/hooks/useWorkspace'
-import { montserrat } from '@/pages/_app'
-import { AuthService } from '@/services/auth.service'
-import { cn } from '@/utils/cn'
-import { useQueryClient } from '@tanstack/react-query'
-import type { Workspace } from 'database'
-import { Circle, LogOut, Plus } from 'lucide-react'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { useCallback } from 'react'
 import { Button } from './Button'
 import {
   DropdownMenu,
@@ -25,6 +12,19 @@ import { InviteWorkspaceDialog } from './InviteWorkspaceDialog'
 import { ManageInvitationsDialog } from './ManageInvitationsDialog'
 import { ManageMembersDialog } from './ManageMembersDialog'
 import { UserAvatar } from './UserAvatar'
+import { useAuth } from '@/hooks/useAuth'
+import { useDisclosure } from '@/hooks/useDisclosure'
+import { useError } from '@/hooks/useError'
+import { useWorkspace } from '@/hooks/useWorkspace'
+import { montserrat } from '@/pages/_app'
+import { AuthService } from '@/services/auth.service'
+import { cn } from '@/utils/cn'
+import { useQueryClient } from '@tanstack/react-query'
+import type { Workspace } from 'database'
+import { Circle, LogOut, Plus } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useCallback } from 'react'
 
 export const DashboardLayout = (
   props: React.PropsWithChildren<{
@@ -66,7 +66,7 @@ export const DashboardLayout = (
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>
-                {currentWorkspace.member.role === 'OWNER' && (
+                {currentWorkspace.member.role === 'ADMIN' && (
                   <DropdownMenuItem onClick={invitePeopleDisclosure.onOpen}>
                     <span className="truncate font-montserrat">
                       Invite people to {currentWorkspace.name}
@@ -97,7 +97,10 @@ export const DashboardLayout = (
                       currentWorkspace.id === workspace.id
 
                     return (
-                      <Link href={`/workspace/${workspace.id}`}>
+                      <Link
+                        key={workspace.id}
+                        href={`/workspace/${workspace.id}`}
+                      >
                         <DropdownMenuItem
                           className="flex flex-row space-x-2 items-center"
                           key={workspace.id}
