@@ -1,4 +1,5 @@
-import type { Thread, User } from 'db'
+import type { ThreadPopulated } from './thread'
+import type { User, Review } from 'database'
 
 export interface StartThreadInput {
   pathname: string
@@ -42,15 +43,6 @@ export interface File {
   url?: string
 }
 
-export interface Review {
-  title: string
-  id: string
-  type: 'FILE' | 'WEBSITE'
-  website?: string
-  file?: File
-  users: ReviewUser[]
-}
-
 export interface Message {
   files: File[]
   id: number
@@ -63,7 +55,26 @@ export interface ListReviewsOutput {
   reviews: Review[]
 }
 
+export interface PaginationMetadata {
+  total: number
+  page: number
+  pages: number
+}
+
+export interface PaginationParams {
+  search?: string
+  page: number
+  limit: number
+}
+
+export interface PaginateReviewsInput extends PaginationParams {}
+
+export interface PaginateReviewsOutput extends PaginationMetadata {
+  reviews: Review[]
+}
+
 export interface RetrieveReviewDetailOutput
   extends Omit<Review, 'users' | 'threads'> {
-  threads: Thread[]
+  file?: File
+  threads: ThreadPopulated[]
 }

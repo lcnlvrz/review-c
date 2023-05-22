@@ -1,6 +1,6 @@
+import type { SSFunction } from './compose'
 import { AuthService } from '@/services/auth.service'
 import type { User } from 'database'
-import type { SSFunction } from './compose'
 
 export const withAuth = (
   redirectQueryParams?: Record<string, string>

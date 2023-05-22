@@ -1,7 +1,7 @@
-import type { Workspace } from 'database'
 import type { SSFunction } from './compose'
-import { WorkspaceService } from '@/services/workspace.service'
 import { AuthService } from '@/services/auth.service'
+import { WorkspaceService } from '@/services/workspace.service'
+import type { Workspace } from 'database'
 
 export const withWorkspaces: SSFunction<{ workspaces: Workspace[] }> = async (
   ctx,
@@ -17,8 +17,6 @@ export const withWorkspaces: SSFunction<{ workspaces: Workspace[] }> = async (
         const invitations = await AuthService.listInvitations(cookie).then(
           (res) => res.invitations
         )
-
-        console.log('invitations', invitations)
 
         if (!invitations.length) {
           return {

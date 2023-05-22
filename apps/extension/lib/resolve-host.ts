@@ -16,7 +16,7 @@ export const resolveHost = () => {
       const [mainTab] = tabs
 
       if (mainTab) {
-        resolve(new URL(mainTab.url))
+        resolve(new URL(mainTab.url || 'http://review-c.localtest.me'))
       }
     })
   })

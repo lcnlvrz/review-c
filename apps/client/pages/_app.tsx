@@ -35,12 +35,14 @@ export default function App({ Component, pageProps }: AppProps<any>) {
   const store = createStore()
   store.set(pagePropsAtom, pageProps)
 
+  console.log('montserrat', montserrat)
+
   return (
     //TODO: introduce jotai atoms for distribute pageProps across components
     <QueryClientProvider client={queryClient}>
       <AuthProvider auth={pageProps.auth}>
         <WorkspaceProvider currentWorkspace={pageProps.currentWorkspace}>
-          <main className={`${montserrat.variable} font-sans`}>
+          <main>
             <style jsx global>{`
               :root {
                 --dm-font: ${montserrat.style.fontFamily};

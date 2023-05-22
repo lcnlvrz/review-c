@@ -31,6 +31,7 @@ var common_exports = {};
 __export(common_exports, {
   MAX_FILE_SIZE_IN_BYTES: () => MAX_FILE_SIZE_IN_BYTES,
   composeUserName: () => composeUserName,
+  discriminateMessages: () => discriminateMessages,
   getUserAgentSpecs: () => getUserAgentSpecs
 });
 module.exports = __toCommonJS(common_exports);
@@ -69,9 +70,19 @@ var getUserAgentSpecs = (userAgent) => {
     } : {}
   };
 };
+
+// utils/discriminate-messages.ts
+var discriminateMessages = (messages = []) => {
+  const [starterMessage, ...subsequentMessages] = messages;
+  return {
+    starterMessage,
+    subsequentMessages
+  };
+};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   MAX_FILE_SIZE_IN_BYTES,
   composeUserName,
+  discriminateMessages,
   getUserAgentSpecs
 });

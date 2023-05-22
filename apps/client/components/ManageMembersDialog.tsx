@@ -1,15 +1,3 @@
-import { MEMBERS_QUERY_KEY } from '@/constants/query-keys'
-import { useAuth } from '@/hooks/useAuth'
-import { useDisclosure, UseDisclosureReturn } from '@/hooks/useDisclosure'
-import { useError } from '@/hooks/useError'
-import { useToast } from '@/hooks/useToast'
-import { useWorkspace } from '@/hooks/useWorkspace'
-import { MemberWithUser, WorkspaceService } from '@/services/workspace.service'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import type { ColumnDef } from '@tanstack/react-table'
-import Fuse from 'fuse.js'
-import { ChevronDown, Minus, SearchIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,13 +11,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from './Avatar'
 import { Button } from './Button'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from './Dialog'
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -42,6 +23,25 @@ import { Separator } from './Separator'
 import { Skeleton } from './Skeleton'
 import { SomethingWrongErr } from './SomethingWrongErr'
 import { Table } from './Table'
+import { MEMBERS_QUERY_KEY } from '@/constants/query-keys'
+import { useAuth } from '@/hooks/useAuth'
+import { useDisclosure, UseDisclosureReturn } from '@/hooks/useDisclosure'
+import { useError } from '@/hooks/useError'
+import { useToast } from '@/hooks/useToast'
+import { useWorkspace } from '@/hooks/useWorkspace'
+import { MemberWithUser, WorkspaceService } from '@/services/workspace.service'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import type { ColumnDef } from '@tanstack/react-table'
+import Fuse from 'fuse.js'
+import { ChevronDown, Minus, SearchIcon } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from 'ui'
 
 interface Props extends UseDisclosureReturn {}
 

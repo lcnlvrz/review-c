@@ -1,12 +1,18 @@
+import type { SSFunction } from './compose'
 import type { WorkspaceWithMember } from '@/providers/WorkspaceProvider'
 import { WorkspaceService } from '@/services/workspace.service'
-import type { Workspace } from 'database'
-import type { SSFunction } from './compose'
+import * as z from 'zod'
+
+const paramsSchema = z.object({
+  workspaceId: z.string().min(1),
+})
 
 export const withCurrentWorkspace: SSFunction<{
   currentWorkspace: WorkspaceWithMember
 }> = async (ctx, cookie) => {
-  if (!ctx?.params?.workspaceId || Array.isArray(ctx?.params?.workspaceId)) {
+  const params = paramsSchema.safeParse(ctx.params)
+
+  if (!params.success) {
     return {
       notFound: true,
     }
@@ -14,9 +20,11 @@ export const withCurrentWorkspace: SSFunction<{
 
   try {
     const workspace = await WorkspaceService.detail(
-      ctx?.params?.workspaceId as string,
+      params.data.workspaceId,
       cookie
     )
+
+    console.log('workspace', workspace)
 
     return {
       props: {

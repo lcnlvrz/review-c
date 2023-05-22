@@ -1,11 +1,4 @@
 import { Button } from './Button'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from './Dialog'
 import { Input } from './Input'
 import {
   Select,
@@ -32,7 +25,14 @@ import { Label } from '@radix-ui/react-dropdown-menu'
 import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { useCallback, useState } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from 'ui'
 
 const Body = (props: { onClose: () => void }) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -76,9 +76,6 @@ const Body = (props: { onClose: () => void }) => {
     },
     [workspace.id]
   )
-
-  console.log('methods.formState.errors', methods.formState.errors)
-  console.log('fields', fields)
 
   return (
     <form onSubmit={methods.handleSubmit(onCreateReview)}>
@@ -173,7 +170,7 @@ const Body = (props: { onClose: () => void }) => {
       </div>
 
       <DialogFooter className="mt-5">
-        <Button isLoading={isLoading} type="submit">
+        <Button size="sm" isLoading={isLoading} type="submit">
           Create review
         </Button>
       </DialogFooter>

@@ -6,11 +6,15 @@ module.exports = {
   mode: 'jit',
   darkMode: ['class', '[data-theme="dark"]'],
   content: [
-    './**/*.tsx',
     path.join(path.dirname(require.resolve('ui')), '**/*.tsx'),
+    './**/*.tsx',
     './app/**/*.{js,ts,jsx,tsx}',
     './pages/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
+    'app/**/*.{ts,tsx}',
+    'components/**/*.{ts,tsx}',
+    './**/*.tsx',
+    'components/*.tsx',
   ],
   theme: {
     container: {

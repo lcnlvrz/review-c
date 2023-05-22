@@ -1,13 +1,11 @@
+import { cn } from '../utils/cn'
+import { Button } from './Button'
+import { Dialog, DialogContent, DialogDescription } from './Dialog'
 import { Progress } from './Progress'
 import { Slider } from './Slider'
-import { Button } from './button/button'
 import { ChevronLeft, ChevronRight, Minus, Plus, X } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import Draggable from 'react-draggable'
-import { Dialog, DialogContent, DialogDescription } from 'ui'
-import { getContentShadowDomRef } from '~lib/get-content-shadow-dom-ref'
-import { cn } from '~lib/utils'
-import { useReview } from '~providers/ReviewProvider'
 
 interface Image {
   src: string
@@ -35,8 +33,12 @@ const ImagePreview = (
       {props.onRemove && (
         <div className="absolute -top-3 -right-3">
           <Button
-            onClick={() => props.onRemove()}
-            size="xs"
+            onClick={() => {
+              if (props.onRemove) {
+                props.onRemove()
+              }
+            }}
+            size="sm"
             className="bg-white group shadow-lg rounded-full border border-gray-100"
           >
             <X className="w-3 h-3 group-hover:fill-white group-hover:text-white" />
@@ -62,33 +64,38 @@ const ZOOM_STEP = 1.5
 const MAX_ZOOM_FACTOR = 3
 
 export const ImageGallery = (props: {
+  portalRef?: HTMLElement
   images: Image[]
   onRemove?: (index: number) => void
 }) => {
   const [imageFocusIndex, setImageFocusIndex] = useState<number>()
 
-  const [originalDimensions, setOriginalDimensions] =
-    useState<ImageDimensions>()
+  const [originalDimensions, setOriginalDimensions] = useState<ImageDimensions>(
+    {
+      height: 0,
+      width: 0,
+    }
+  )
 
   const [zoomFactor, setZoomFactor] = useState<number>(0)
 
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 })
 
-  const [imageDimensions, setImageDimensions] = useState<ImageDimensions>()
+  const [imageDimensions, setImageDimensions] = useState<ImageDimensions>({
+    height: 0,
+    width: 0,
+  })
 
   const focusImage = useMemo(
-    () => props.images[imageFocusIndex],
+    () =>
+      typeof imageFocusIndex === 'number'
+        ? props.images[imageFocusIndex]
+        : undefined,
     [imageFocusIndex, props.images.length]
   )
 
-  const ctx = useReview()
-
-  const portalRef = getContentShadowDomRef()
-
   const applyZoom = useCallback(
     (zoomFactor: number) => {
-      console.log('zoomFactor', zoomFactor)
-
       if (!zoomFactor) {
         setImageDimensions({
           width: originalDimensions.width,
@@ -103,11 +110,9 @@ export const ImageGallery = (props: {
       }
 
       setZoomFactor(zoomFactor)
-      setImageDimensions((prev) => {
-        return {
-          width: originalDimensions.width * zoomFactor,
-          height: originalDimensions.height * zoomFactor,
-        }
+      setImageDimensions({
+        width: originalDimensions.width * zoomFactor,
+        height: originalDimensions.height * zoomFactor,
       })
     },
     [originalDimensions]
@@ -128,7 +133,11 @@ export const ImageGallery = (props: {
               }}
               {...(props.onRemove
                 ? {
-                    onRemove: () => props.onRemove(index),
+                    onRemove: () => {
+                      if (props.onRemove) {
+                        props.onRemove(index)
+                      }
+                    },
                   }
                 : {})}
             />
@@ -139,12 +148,11 @@ export const ImageGallery = (props: {
         open={!!focusImage}
         onOpenChange={(open) => {
           if (!open) {
-            ctx.showAbsoluteElements()
             setImageFocusIndex(undefined)
           }
         }}
       >
-        <DialogContent portalRef={portalRef} className="sm:max-w-4xl">
+        <DialogContent portalRef={props.portalRef} className="sm:max-w-4xl">
           {!!focusImage && (
             <DialogDescription className="overflow-hidden p-3">
               <div
@@ -154,7 +162,9 @@ export const ImageGallery = (props: {
                 {imageFocusIndex !== 0 && (
                   <div className="absolute left-0 top-[50%] z-10">
                     <Button
-                      onClick={() => setImageFocusIndex(imageFocusIndex - 1)}
+                      onClick={() =>
+                        setImageFocusIndex((imageFocusIndex || 0) - 1)
+                      }
                       className="bg-white rounded-full"
                     >
                       <ChevronLeft />
@@ -188,8 +198,8 @@ export const ImageGallery = (props: {
                         {...(!zoomFactor
                           ? {
                               style: {
-                                width: containerRef.current?.clientWidth,
-                                height: containerRef.current?.clientHeight,
+                                width: containerRef?.current?.clientWidth,
+                                height: containerRef?.current?.clientHeight,
                               },
                             }
                           : {})}
@@ -221,7 +231,9 @@ export const ImageGallery = (props: {
                 {imageFocusIndex !== props.images.length - 1 && (
                   <div className="absolute right-0 top-[50%] z-10">
                     <Button
-                      onClick={() => setImageFocusIndex(imageFocusIndex + 1)}
+                      onClick={() =>
+                        setImageFocusIndex((imageFocusIndex || 0) + 1)
+                      }
                       className="bg-white rounded-full"
                     >
                       <ChevronRight />

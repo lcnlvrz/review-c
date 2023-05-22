@@ -1,14 +1,15 @@
-import type { SSFunction } from './compose'
-import type { ListReviewsOutput } from '@/../../packages/common'
+import type { SSFunction, getPagePropsTypeSafety } from './compose'
+import type { RetrieveReviewDetailOutput } from '@/../../packages/common'
 import { ReviewService } from '@/services/review.service'
 import * as z from 'zod'
 
 const paramsSchema = z.object({
+  reviewId: z.string().min(1),
   workspaceId: z.string().min(1),
 })
 
-export const withReviews: SSFunction<{
-  reviews: ListReviewsOutput['reviews']
+export const withReviewDetail: SSFunction<{
+  review: RetrieveReviewDetailOutput
 }> = async (ctx, cookie) => {
   const params = paramsSchema.safeParse(ctx.params)
 
@@ -19,15 +20,13 @@ export const withReviews: SSFunction<{
   }
 
   try {
-    const { reviews } = await ReviewService.paginateReviews(
-      params.data.workspaceId,
-      undefined,
-      cookie
-    )
-
     return {
       props: {
-        reviews,
+        review: await ReviewService.detail(
+          params.data.workspaceId,
+          params.data.reviewId,
+          cookie
+        ),
       },
     }
   } catch (err) {

@@ -12,19 +12,6 @@ services:
       MINIO_SECRET_KEY: SZ69UCZBC5ycyV356Nv0
     command: server --console-address ":9001" /data
 
-  createbuckets:
-    image: minio/mc
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 xWWXcCdvyNLlHGt2cwyC SZ69UCZBC5ycyV356Nv0;
-      /usr/bin/mc rm -r --force myminio/review-c;
-      /usr/bin/mc mb myminio/review-c;
-      /usr/bin/mc policy download myminio/review-c;
-      exit 0;
-      "
-
   db:
     container_name: db
     image: mysql:5.7
@@ -41,6 +28,18 @@ services:
       - my-db:/var/lib/mysql
     extra_hosts:
       - 'docker.localhost:host-gateway'
+
+  proxy:
+    image: 'traefik:latest'
+    container_name: 'proxy'
+    ports:
+      - '80:80'
+      - '8080:8080'
+    volumes:
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - ./dynamic.yml:/etc/traefik/dynamic.yml
+    extra_hosts:
+      - 'docker.host:host-gateway'
 
 volumes:
   my-db:

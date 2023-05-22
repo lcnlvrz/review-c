@@ -9,7 +9,7 @@ export const configApp = async (app: INestApplication) => {
   await prismaService.enableShutdownHooks(app)
 
   app.useGlobalInterceptors(new ResponseInterceptor())
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(new ValidationPipe({ transform: true }))
 
   app.enableCors({
     origin: '*',

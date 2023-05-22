@@ -5,6 +5,7 @@ import { WorkspaceGuard } from '../workspace/guards/workspace.guard'
 import { ReqReview } from './decorators/review.decorator'
 import { AddMessageDTO } from './dtos/add-message.dto'
 import { ListReviewsQueryParamsDTO } from './dtos/list-reviews-query-params.dto'
+import { PaginateReviewsParamsDTO } from './dtos/paginate-reviews-params.dto'
 import { RetrieveReviewQueryParamsDTO } from './dtos/retrieve-review-query-params.dto'
 import { CreateThreadDTO } from './dtos/start-thread.dto'
 import { MessageOwnershipGuard } from './guards/message-ownership.guard'
@@ -160,6 +161,18 @@ export class ReviewController {
     @Query() query: ListReviewsQueryParamsDTO
   ) {
     return await this.reviewService.listReviews({
+      workspace,
+      query,
+    })
+  }
+
+  @Get(':workspaceId/review/paginate')
+  @UseGuards(UserGuard, WorkspaceGuard)
+  async paginateReviews(
+    @ReqWorkspace() workspace: Workspace,
+    @Query() query: PaginateReviewsParamsDTO
+  ) {
+    return await this.reviewService.paginateReviews({
       workspace,
       query,
     })

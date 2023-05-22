@@ -1,19 +1,4 @@
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from '@/components/Dialog'
-import { INVITATIONS_QUERY_KEY } from '@/constants/query-keys'
-import { useDisclosure, UseDisclosureReturn } from '@/hooks/useDisclosure'
-import { useError } from '@/hooks/useError'
-import { useToast } from '@/hooks/useToast'
-import { useWorkspace } from '@/hooks/useWorkspace'
-import { WorkspaceService } from '@/services/workspace.service'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Invitation } from 'database'
-import { useCallback, useState } from 'react'
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -25,11 +10,21 @@ import {
   AlertDialogTrigger,
 } from './AlertDialog'
 import { Button } from './Button'
-import { DialogHeader } from './Dialog'
 import { InviteWorkspaceDialog } from './InviteWorkspaceDialog'
 import { ScrollArea } from './ScrollArea'
 import { Skeleton } from './Skeleton'
 import { SomethingWrongErr } from './SomethingWrongErr'
+import { INVITATIONS_QUERY_KEY } from '@/constants/query-keys'
+import { useDisclosure, UseDisclosureReturn } from '@/hooks/useDisclosure'
+import { useError } from '@/hooks/useError'
+import { useToast } from '@/hooks/useToast'
+import { useWorkspace } from '@/hooks/useWorkspace'
+import { WorkspaceService } from '@/services/workspace.service'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import type { Invitation } from 'database'
+import { useCallback, useState } from 'react'
+import { DialogHeader } from 'ui'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from 'ui'
 
 interface Props extends UseDisclosureReturn {}
 

@@ -1,6 +1,6 @@
 import { CreateThreadDTO } from './start-thread.dto'
-import { PickType } from '@nestjs/mapped-types'
+import { PartialType, PickType } from '@nestjs/mapped-types'
 
-export class RetrieveReviewQueryParamsDTO extends PickType(CreateThreadDTO, [
-  'pathname',
-]) {}
+export class RetrieveReviewQueryParamsDTO extends PartialType(
+  PickType(CreateThreadDTO, ['pathname'])
+) {}

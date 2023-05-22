@@ -1,5 +1,12 @@
+import { REVIEWS_PAGINATION_DEFAULT_VALUE } from '@/components/ReviewsTable'
 import { httpClient } from '@/http/client'
-import type { CreateReviewInput, ListReviewsOutput } from 'common'
+import type {
+  CreateReviewInput,
+  ListReviewsOutput,
+  PaginateReviewsInput,
+  PaginateReviewsOutput,
+  RetrieveReviewDetailOutput,
+} from 'common'
 import type { CreateReviewOutput } from 'common'
 
 export class ReviewService {
@@ -9,6 +16,20 @@ export class ReviewService {
   ): Promise<CreateReviewOutput> {
     return await httpClient
       .post(`/workspace/${workspaceId}/review`, input)
+      .then((res) => res.data)
+  }
+
+  static async detail(
+    workspaceId: string,
+    reviewId: string,
+    cookie?: string
+  ): Promise<RetrieveReviewDetailOutput> {
+    return await httpClient
+      .get(`/workspace/${workspaceId}/review/${reviewId}`, {
+        headers: {
+          cookie,
+        },
+      })
       .then((res) => res.data)
   }
 
@@ -29,5 +50,23 @@ export class ReviewService {
         params,
       })
       .then((res) => res.data)
+  }
+
+  static async paginateReviews(
+    workspaceId: string,
+    params: PaginateReviewsInput = {
+      page: REVIEWS_PAGINATION_DEFAULT_VALUE.pageIndex + 1,
+      limit: REVIEWS_PAGINATION_DEFAULT_VALUE.pageSize,
+    },
+    cookie?: string
+  ) {
+    return await httpClient
+      .get(`/workspace/${workspaceId}/review/paginate`, {
+        headers: {
+          cookie,
+        },
+        params,
+      })
+      .then((res) => res.data as PaginateReviewsOutput)
   }
 }

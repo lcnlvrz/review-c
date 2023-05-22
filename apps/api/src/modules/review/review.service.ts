@@ -3,6 +3,7 @@ import { FileService } from '../file/file.service'
 import { S3Provider } from '../file/providers/s3.provider'
 import { AddMessageDTO } from './dtos/add-message.dto'
 import { ListReviewsQueryParamsDTO } from './dtos/list-reviews-query-params.dto'
+import { PaginateReviewsParamsDTO } from './dtos/paginate-reviews-params.dto'
 import { CreateThreadDTO } from './dtos/start-thread.dto'
 import { CreateReviewPipeOutput } from './pipes/create-review.pipe'
 import { Injectable } from '@nestjs/common'
@@ -10,13 +11,14 @@ import { randomStringGenerator } from '@nestjs/common/utils/random-string-genera
 import {
   CreateReviewOutput,
   ListReviewsOutput,
+  PaginateReviewsOutput,
+  RetrieveReviewDetailOutput,
   getUserAgentSpecs,
 } from 'common'
 import * as crypto from 'crypto'
 import { Message, Review, Thread, User, Workspace } from 'database'
 import { FileTokenClaims } from 'src/common/guards/file-tokens.guard'
 import { POST_PRESIGNED_URL_EXPIRATION_SECONDS } from 'src/constants/file'
-import { safeURLParse } from 'src/utils/safe-url-parse'
 
 const nanoid = require('nanoid')
 
@@ -182,6 +184,46 @@ export class ReviewService {
     }
   }
 
+  async paginateReviews(input: {
+    workspace: Workspace
+    query: PaginateReviewsParamsDTO
+  }): Promise<PaginateReviewsOutput> {
+    const skip = (input.query.page - 1) * input.query.limit
+    const take = input.query.limit
+
+    type Filter = Parameters<
+      (typeof DatabaseService)['prototype']['review']['findMany']
+    >['0']['where']
+
+    const filter: Filter = {
+      workspaceId: input.workspace.id,
+      ...(input.query.search
+        ? {
+            title: {
+              contains: input.query.search,
+            },
+          }
+        : {}),
+    }
+
+    const reviews = await this.dbService.review.findMany({
+      skip,
+      take,
+      where: filter,
+    })
+
+    const total = await this.dbService.review.count({
+      where: filter,
+    })
+
+    return {
+      pages: Math.ceil(total / input.query.limit),
+      page: input.query.page,
+      reviews,
+      total,
+    }
+  }
+
   async listReviews(input: {
     workspace: Workspace
     query: ListReviewsQueryParamsDTO
@@ -205,7 +247,10 @@ export class ReviewService {
     }
   }
 
-  async retrieveReviewDetail(input: { reviewId: string; pathname: string }) {
+  async retrieveReviewDetail(input: {
+    reviewId: string
+    pathname: string
+  }): Promise<RetrieveReviewDetailOutput> {
     return await this.dbService.review
       .findFirst({
         where: {
@@ -215,9 +260,14 @@ export class ReviewService {
           threads: {
             where: {
               resolvedAt: null,
-              pathname: input.pathname,
+              ...(input.pathname
+                ? {
+                    pathname: input.pathname,
+                  }
+                : {}),
             },
             include: {
+              startedBy: true,
               point: {
                 include: {
                   createdBy: true,
@@ -231,9 +281,10 @@ export class ReviewService {
               },
             },
           },
+          file: true,
         },
       })
-      .then(async (review) => {
+      .then(async (review): Promise<RetrieveReviewDetailOutput> => {
         review.threads = await Promise.all(
           review.threads.map(async (thread) => {
             thread.messages = await Promise.all(
@@ -262,6 +313,19 @@ export class ReviewService {
             return thread
           })
         )
+
+        if (review.file) {
+          return {
+            ...review,
+            file: {
+              ...review.file,
+              url: await this.s3.generatePresignedGetURL({
+                key: review.file.storedKey,
+                expirationInSeconds: POST_PRESIGNED_URL_EXPIRATION_SECONDS,
+              }),
+            },
+          }
+        }
 
         return review
       })

@@ -1,0 +1,11 @@
+http:
+  routers:
+    reviewc-client:
+      rule: 'Host(`review.localhost`) || Host(`review-c.localtest.me`)'
+      service: reviewc-client
+
+  services:
+    reviewc-client:
+      loadBalancer:
+        servers:
+          - url: 'http://docker.host:3002'
