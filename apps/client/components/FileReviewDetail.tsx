@@ -1,7 +1,9 @@
-import { FileViewer } from './FileViewer'
 import { useReviewDetail } from '@/providers/ReviewDetailProvider'
+import dynamic from 'next/dynamic'
 import React from 'react'
 import { Badge } from 'ui'
+
+const FileViewer = dynamic(() => import('./FileViewer'), { ssr: false })
 
 export const FileReviewDetail = () => {
   const review = useReviewDetail()
