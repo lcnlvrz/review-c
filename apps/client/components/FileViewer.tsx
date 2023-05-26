@@ -56,7 +56,7 @@ const PDFViewer = React.memo((props: Props) => {
   )
 
   const onWithChange = useCallback(() => {
-    setWidth(window.innerWidth - 200)
+    setWidth(window.innerWidth - 250)
   }, [])
 
   useEffect(() => {

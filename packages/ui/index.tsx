@@ -1,4 +1,7 @@
 export * from './components/GoogleLoginBtn'
+
+export * from './utils/cn'
+export * from './components/Textarea'
 export * from './components/Logo'
 export * from './components/PublicLayout'
 export * from './components/Tooltip'

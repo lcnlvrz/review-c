@@ -15,8 +15,11 @@ import { AppError } from 'src/common/error'
 export class ReviewOriginGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest()
-
     const review: Review = request[REVIEW_REQUEST_KEY]
+
+    if (review.type !== 'WEBSITE') {
+      return true
+    }
 
     const origin = request.headers.origin
 

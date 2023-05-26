@@ -1,0 +1,125 @@
+import { useAPI } from './useAPI'
+import html2canvas from 'html2canvas'
+import { useCallback, useState } from 'react'
+
+interface Screenshot {
+  name: string
+  progress: number
+  isLoading: boolean
+  src: string
+  token: string
+}
+
+export const useScreenshot = (initialValue: Screenshot[] = []) => {
+  const fileAPI = useAPI('file')
+
+  const [screenshots, setScreenshots] = useState<Screenshot[]>(initialValue)
+
+  const uploadScreenshot = useCallback((file: File) => {
+    fileAPI
+      .presignedPostURL({
+        filename: file.name,
+        mimetype: file.type,
+      })
+      .then((res) => {
+        const form = new FormData()
+
+        Object.entries(res.fields).forEach(([key, value]) => {
+          form.append(key, value)
+        })
+
+        form.append('file', file)
+
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', res.url, true)
+
+        xhr.upload.onprogress = (e) => {
+          const progress = Math.ceil((e.loaded / e.total) * 100)
+
+          setScreenshots((screenshots) => {
+            console.log('screenshots on xr', screenshots)
+            return screenshots.map((screenshot) => {
+              if (screenshot.name === file.name) {
+                screenshot.progress = progress
+                return screenshot
+              }
+
+              return screenshot
+            })
+          })
+        }
+
+        xhr.send(form)
+
+        xhr.onload = function () {
+          if (this.status >= 200 && this.status < 300) {
+            setScreenshots((screenshots) => {
+              console.log('screenshots on xr', screenshots)
+              return screenshots.map((screenshot) => {
+                if (screenshot.name === file.name) {
+                  screenshot.isLoading = false
+                  screenshot.token = res.token
+                  return screenshot
+                }
+
+                return screenshot
+              })
+            })
+          }
+        }
+      })
+      .catch(console.error)
+  }, [])
+
+  const takeScreenshot = useCallback((element: HTMLElement) => {
+    html2canvas(element)
+      .then((canvas) => {
+        const name = `screenshot-${new Date().getTime()}.png`
+
+        setScreenshots((screenshots) => {
+          return screenshots.concat([
+            {
+              token: '',
+              src: canvas.toDataURL(),
+              isLoading: true,
+              progress: 0,
+              name,
+            },
+          ])
+        })
+
+        canvas.toBlob((blob) => {
+          const file = new File([blob], name, {
+            type: 'image/png',
+          })
+
+          uploadScreenshot(file)
+        })
+      })
+      .catch(console.error)
+  }, [])
+
+  const removeScreenshot = useCallback((index: number) => {
+    setScreenshots((screenshots) => screenshots.filter((_, i) => i !== index))
+  }, [])
+
+  const addScreenshot = useCallback((screenshot: Screenshot) => {
+    setScreenshots((screenshots) => screenshots.concat([screenshot]))
+  }, [])
+
+  const clearScreenshots = useCallback(() => {
+    setScreenshots([])
+    console.log('clear')
+  }, [])
+
+  console.log('screenshots', screenshots)
+
+  return {
+    screenshots,
+    takeScreenshot,
+    removeScreenshot,
+    uploadScreenshot,
+    addScreenshot,
+    clearScreenshots,
+  }
+}

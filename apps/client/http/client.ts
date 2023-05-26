@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+export const BASE_URL_API = process.env.NEXT_PUBLIC_API_URL
+
 export const httpClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: BASE_URL_API,
 })
 
 httpClient.interceptors.response.use(

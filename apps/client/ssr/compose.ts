@@ -1,11 +1,15 @@
-import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
+import { withAuth } from './withAuth'
 import type { withCurrentWorkspace } from './withCurrentWorkspace'
 import get from 'lodash.get'
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next'
 
 export interface PagePropsMergedMap {
   currentWorkspace: Awaited<
     ReturnTypeSSFunction<typeof withCurrentWorkspace>['props']
   >['currentWorkspace']
+  auth: Awaited<
+    ReturnTypeSSFunction<ReturnType<typeof withAuth>>['props']
+  >['auth']
 }
 
 export const getPagePropsTypeSafety = <

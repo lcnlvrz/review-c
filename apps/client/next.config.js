@@ -19,7 +19,7 @@ const nextConfig = {
       },
     ]
   },
-  transpilePackages: ['ui', 'configs'],
+  transpilePackages: ['ui', 'configs', 'core'],
 }
 
 module.exports = withBundleAnalyzer(nextConfig)

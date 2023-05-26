@@ -1,0 +1,24 @@
+{
+  "name": "core",
+  "version": "1.0.0",
+  "description": "High level core components for review-c cross platform apps",
+  "main": "./index.tsx",
+  "types": "./index.tsx",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Luciano Alvarez",
+  "license": "ISC",
+  "dependencies": {
+    "clients": "*",
+    "common": "*",
+    "database": "*",
+    "lucide-react": "^0.221.0",
+    "ui": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.22",
+    "react": "^18.2.0"
+  }
+}

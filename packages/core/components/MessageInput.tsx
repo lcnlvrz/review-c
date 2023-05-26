@@ -1,30 +1,20 @@
-import { ImageGallery } from './ImageGallery'
+import { useScreenshot } from '../hooks/useScreenshot'
+import { useInspectElements } from '../providers/InspectElementsProvider'
 import type { MarkerPoint } from './PointMarker'
-import { Textarea } from './Textarea'
 import { Camera, Plus, Send } from 'lucide-react'
 import React, { useCallback } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
-import type { useDisclosure } from '~hooks/useDisclosure'
-import type { useScreenshot } from '~hooks/useScreenshot'
-import { cn } from '~lib/utils'
-import { useReview } from '~providers/ReviewProvider'
+import { ImageGallery, Textarea, cn } from 'ui'
 
 export const MessageInput = <T extends object>(props: {
   height?: `h-${number}`
   className?: string
   formCtrl: UseFormReturn<T>
-  inspectElementsCtrl: ReturnType<typeof useDisclosure>
   screenshotsCtrl: ReturnType<typeof useScreenshot>
   point: Pick<Extract<MarkerPoint, { visible: true }>, 'left' | 'top'>
   onSubmit: (data: T) => void
 }) => {
-  const ctx = useReview()
-
-  const startInspectingElements = useCallback(() => {
-    ctx.blurCursor()
-    ctx.hideAbsoluteElements()
-    props.inspectElementsCtrl.onOpen()
-  }, [])
+  const { inspectElements } = useInspectElements()
 
   const onUploadImage = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +44,7 @@ export const MessageInput = <T extends object>(props: {
   return (
     <div
       className={cn(
-        '!pt-0 !pl-2 w-full h-full bg-gray-50 rounded-b-2xl z-50',
+        '!pt-0 !pl-2 w-full h-full bg-gray-50 rounded-b-2xl',
         props.className
       )}
     >
@@ -89,7 +79,6 @@ export const MessageInput = <T extends object>(props: {
             </div>
 
             <button
-              onClick={props.screenshotsCtrl.removeScreenshot}
               title="Add files"
               className="group-hover:bg-primary group rounded-full p-1 transition-all"
             >
@@ -98,7 +87,11 @@ export const MessageInput = <T extends object>(props: {
           </div>
 
           <button
-            onClick={startInspectingElements}
+            onClick={() => {
+              inspectElements().then((elementSelected) => {
+                props.screenshotsCtrl.takeScreenshot(elementSelected)
+              })
+            }}
             title="Take a screenshot"
             className="hover:bg-primary group rounded-full p-1 transition-all"
           >

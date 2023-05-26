@@ -41,7 +41,7 @@ const ImagePreview = (
             size="sm"
             className="bg-white group shadow-lg rounded-full border border-gray-100"
           >
-            <X className="w-3 h-3 group-hover:fill-white group-hover:text-white" />
+            <X className="text-black w-3 h-3 group-hover:fill-white group-hover:text-white" />
           </Button>
         </div>
       )}
