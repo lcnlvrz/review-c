@@ -1,12 +1,11 @@
 import { useAPI } from '../hooks/useAPI'
-import { UseDisclosureProps, useDisclosure } from '../hooks/useDisclosure'
+import { useDisclosure } from '../hooks/useDisclosure'
 import { useScreenshot } from '../hooks/useScreenshot'
 import { useReview } from '../providers/ReviewProvider'
 import { MessageSchema, messageSchema } from '../schemas/message.schema'
 import { discriminateMessages } from '../utils/discriminate-messages'
 import { buildReviewDetailQueryKey } from '../utils/query-key-builders'
 import { ConfirmDeleteThread } from './ConfirmDeleteThread'
-import { InspectElements } from './InspectElements'
 import { MessageContainer, MessageContent } from './Message'
 import { MessageInput } from './MessageInput'
 import { MessageOptions } from './MessageOptions'
@@ -76,8 +75,6 @@ const MessageForm = (props: MessageFormProps) => {
       }
     })
   )
-
-  console.log('screenshotsCtrl', screenshotsCtrl.screenshots)
 
   const formCtrl = useForm<MessageSchema>({
     resolver: zodResolver(messageSchema),
@@ -298,6 +295,7 @@ export const Thread = (props: {
               ctrl={deleteThreadCtrl}
             />
             <MessageOptions
+              className="p-4"
               onEdit={editCtrl.toggle}
               onDelete={deleteThreadCtrl.toggle}
             />

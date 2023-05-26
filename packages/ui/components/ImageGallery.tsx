@@ -38,7 +38,7 @@ const ImagePreview = (
                 props.onRemove()
               }
             }}
-            size="sm"
+            size="xs"
             className="bg-white group shadow-lg rounded-full border border-gray-100"
           >
             <X className="text-black w-3 h-3 group-hover:fill-white group-hover:text-white" />
@@ -60,8 +60,8 @@ interface ImageDimensions {
   height: number
 }
 
-const ZOOM_STEP = 1.5
-const MAX_ZOOM_FACTOR = 3
+const ZOOM_STEP = 1.1
+const MAX_ZOOM_FACTOR = 6
 
 export const ImageGallery = (props: {
   portalRef?: HTMLElement
@@ -152,12 +152,15 @@ export const ImageGallery = (props: {
           }
         }}
       >
-        <DialogContent portalRef={props.portalRef} className="sm:max-w-4xl">
+        <DialogContent
+          portalRef={props.portalRef}
+          className="sm:max-w-4xl z-50"
+        >
           {!!focusImage && (
             <DialogDescription className="overflow-hidden p-3">
               <div
                 ref={containerRef}
-                className="w-full overflow-hidden h-[40rem] flex items-center justify-center relative"
+                className="w-full overflow-hidden h-[70vh] flex items-center justify-center relative"
               >
                 {imageFocusIndex !== 0 && (
                   <div className="absolute left-0 top-[50%] z-10">
@@ -184,18 +187,34 @@ export const ImageGallery = (props: {
                     position={imagePosition}
                   >
                     <div
-                      className="cursor-grab flex items-center justify-center"
+                      className="cursor-grab w-full h-full flex items-center justify-center"
                       style={{
-                        ...(imageDimensions
-                          ? {
-                              width: imageDimensions.width,
-                              height: imageDimensions.height,
-                            }
-                          : {}),
+                        width: imageDimensions?.width,
+                        height: imageDimensions?.height,
                       }}
                     >
-                      <div
-                        {...(!zoomFactor
+                      <img
+                        draggable={false}
+                        onLoad={(e) => {
+                          const image = e.target as HTMLImageElement
+
+                          const dimensions = {
+                            width: image.naturalWidth,
+                            height: image.naturalHeight,
+                          }
+
+                          console.log('dimensions', dimensions)
+
+                          setOriginalDimensions(dimensions)
+                          setImageDimensions(dimensions)
+                        }}
+                        src={focusImage.src}
+                        className={cn(
+                          'object-contain h-full rounded-lg img-gallery-focus'
+                        )}
+                      />
+                      {/* <div
+                        {...(!zoomFactor && containerRef?.current
                           ? {
                               style: {
                                 width: containerRef?.current?.clientWidth,
@@ -203,7 +222,7 @@ export const ImageGallery = (props: {
                               },
                             }
                           : {})}
-                        className="h-full"
+                        className="h-full w-full flex items-center justify-center"
                       >
                         <img
                           draggable={false}
@@ -211,19 +230,21 @@ export const ImageGallery = (props: {
                             const image = e.target as HTMLImageElement
 
                             const dimensions = {
-                              width: image.width,
-                              height: image.height,
+                              width: image.naturalWidth,
+                              height: image.naturalHeight,
                             }
+
+                            console.log('dimensions', dimensions)
 
                             setOriginalDimensions(dimensions)
                             setImageDimensions(dimensions)
                           }}
                           src={focusImage.src}
                           className={cn(
-                            'w-full object-contain h-full rounded-lg'
+                            'object-contain h-full rounded-lg img-gallery-focus'
                           )}
                         />
-                      </div>
+                      </div> */}
                     </div>
                   </Draggable>
                 </div>

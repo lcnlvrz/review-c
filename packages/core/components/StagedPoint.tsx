@@ -2,6 +2,7 @@ import { useAPI } from '../hooks/useAPI'
 import { useScreenshot } from '../hooks/useScreenshot'
 import { useReview } from '../providers/ReviewProvider'
 import { PointSchema, pointSchema } from '../schemas/point.schema'
+import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
 import { getXPath } from '../utils/get-xpath'
 import { buildReviewDetailQueryKey } from '../utils/query-key-builders'
 import { AbsoluteContainer } from './AbsoluteContainer'
@@ -128,13 +129,13 @@ export const StagedPointListener = (props: {
   const handleMouseClick = useCallback((event: MouseEvent) => {
     event.stopPropagation()
 
-    const toolkitContainer =
-      window.document.getElementById(TOOLKIT_CONTAINER_ID)
+    const toolkitContainer = ctx.PORTAL_SHADOW_ID
+      ? getContentShadowDomRef(TOOLKIT_CONTAINER_ID)
+      : window.document.getElementById(TOOLKIT_CONTAINER_ID)
 
-    const cursor = window.document.getElementById(CURSOR_ID)
-
-    console.log('toolkitContainer', toolkitContainer)
-    console.log('cursor', cursor)
+    const cursor = ctx.PORTAL_SHADOW_ID
+      ? getContentShadowDomRef(CURSOR_ID)
+      : window.document.getElementById(CURSOR_ID)
 
     const clickedToolkit = elementsOverlap(toolkitContainer, cursor)
 
@@ -144,8 +145,6 @@ export const StagedPointListener = (props: {
     }
 
     const target = event.target as HTMLElement
-
-    console.log('target', target)
 
     const xPath = getXPath(target)
 

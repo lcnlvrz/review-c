@@ -1,3 +1,5 @@
+import { useReview } from '../providers/ReviewProvider'
+import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
 import { composeUserName, type MessagePopulated } from 'common'
 import dayjs from 'dayjs'
 import { Smartphone, Monitor } from 'lucide-react'
@@ -41,8 +43,10 @@ export const MessageContent = React.forwardRef<
     isMobile?: boolean
   }
 >(({ className, focus, renderTooltip, isMobile, children, ...props }, ref) => {
+  const ctx = useReview()
+
   const dateDisplay = (
-    <p className="text-sm text-gray-400">
+    <p className="text-xs text-gray-400">
       {dayjs(props.message.createdAt).fromNow()}
     </p>
   )
@@ -78,8 +82,12 @@ export const MessageContent = React.forwardRef<
         )}
       </div>
       <p className="text-sm break-all !py-0 m-0">{props.message.content}</p>
+
       {props.message.files.length > 0 && (
-        <ImageGallery images={props.message.files} />
+        <ImageGallery
+          portalRef={getContentShadowDomRef(ctx.PORTAL_SHADOW_ID)}
+          images={props.message.files}
+        />
       )}
 
       {children}

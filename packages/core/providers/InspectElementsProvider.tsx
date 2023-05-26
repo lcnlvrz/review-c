@@ -1,7 +1,13 @@
 import { getXPath } from '../utils/get-xpath'
 import { isExtensionDOM } from '../utils/is-extension-dom'
 import { useReview } from './ReviewProvider'
-import { createContext, useCallback, useContext, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 
 interface InspectingElement {
   xPath: string
@@ -11,8 +17,11 @@ interface InspectingElement {
   height: number
 }
 
+type InspectElementsFn = () => Promise<HTMLElement>
+
 interface InspectElementsProvider {
-  inspectElements: () => Promise<HTMLElement>
+  isLoading?: boolean
+  inspectElements: InspectElementsFn
   inspectingElement?: InspectingElement
 }
 
@@ -23,12 +32,15 @@ export const useInspectElements = () => useContext(InspectElementsContext)
 export const InspectElementsProvider = (props: {
   children: React.ReactNode
 }) => {
-  const [currentElement, setCurrentElement] = useState<InspectingElement>()
+  const [inspectingElement, setInspectingElement] =
+    useState<InspectingElement>()
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const ctx = useReview()
 
-  const inspectElements = useCallback(() => {
-    return new Promise<HTMLElement>((resolve, reject) => {
+  const inspectElements: InspectElementsFn = useCallback(() => {
+    return new Promise((resolve) => {
       ctx.hideAbsoluteElements()
       ctx.blurCursor()
 
@@ -42,7 +54,7 @@ export const InspectElementsProvider = (props: {
         const xPath = getXPath(target)
         const rect = target.getBoundingClientRect()
 
-        setCurrentElement({
+        setInspectingElement({
           height: rect.height,
           width: rect.width,
           left: rect.left + window.scrollX,
@@ -62,7 +74,8 @@ export const InspectElementsProvider = (props: {
         window.removeEventListener('click', onSelectElement)
         window.removeEventListener('mousemove', handleMouseMove)
 
-        setCurrentElement(undefined)
+        setInspectingElement(undefined)
+        setIsLoading(false)
 
         resolve(event.target as HTMLElement)
       }
@@ -77,8 +90,9 @@ export const InspectElementsProvider = (props: {
   return (
     <InspectElementsContext.Provider
       value={{
+        isLoading,
         inspectElements,
-        inspectingElement: currentElement,
+        inspectingElement,
       }}
     >
       {props.children}

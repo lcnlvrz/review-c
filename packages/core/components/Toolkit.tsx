@@ -23,13 +23,13 @@ export const Toolkit = () => {
         id={TOOLKIT_CONTAINER_ID}
         ref={ref}
         className={cn(
-          'fixed w-[10rem] bottom-0 p-3 right-[50%] left-[50%] z-[50]',
+          'fixed bottom-0 p-3 left-[50%] -translate-x-[50%] z-[50]',
           {
             hidden: !ctx.mustShowAbsoluteElements,
           }
         )}
       >
-        <div className="flex items-center justify-start w-full">
+        <div className="flex items-center justify-start">
           <div className="bg-primary flex items-center border-[1px] border-gray-400 w-full p-2 h-[3rem] rounded-full">
             <TooltipProvider>
               <Tooltip>

@@ -45,7 +45,7 @@ export type MarkerPoint =
 
 export const PointMarker = (props: {
   point: Extract<MarkerPoint, { visible: true }>
-  messages: Omit<MessagePopulated, 'id'>[]
+  messages: MessagePopulated[]
   isStagedPoint?: boolean
 }) => {
   const popover = useDisclosure()
@@ -129,7 +129,7 @@ export const PointMarker = (props: {
 
             <PopoverContent
               className="border-none outline-none p-0"
-              container={getContentShadowDomRef()}
+              container={getContentShadowDomRef(ctx.PORTAL_SHADOW_ID)}
             >
               <Thread
                 startedById={props.point.startedById}

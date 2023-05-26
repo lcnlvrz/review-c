@@ -11,7 +11,6 @@
     "package": "plasmo package"
   },
   "dependencies": {
-    "configs": "*",
     "@hookform/resolvers": "^3.1.0",
     "@plasmohq/messaging": "^0.1.8",
     "@plasmohq/storage": "^1.5.0",
@@ -29,11 +28,13 @@
     "clients": "*",
     "clsx": "^1.2.1",
     "common": "*",
+    "configs": "*",
+    "core": "*",
     "dayjs": "^1.11.7",
     "db": "*",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.162.0",
-    "plasmo": "0.68.3",
+    "plasmo": "^0.73.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-draggable": "^4.4.5",

@@ -21,10 +21,10 @@ export const ConfirmDeleteThread = (props: {
   onClose: () => void
   threadId: number
 }) => {
-  const portal = getContentShadowDomRef()
-
   const reviewAPI = useAPI('review')
   const ctx = useReview()
+
+  const portal = getContentShadowDomRef(ctx.PORTAL_SHADOW_ID)
 
   const queryClient = useQueryClient()
 

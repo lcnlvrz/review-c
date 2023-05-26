@@ -74,10 +74,12 @@ export const useScreenshot = (initialValue: Screenshot[] = []) => {
   const takeScreenshot = useCallback((element: HTMLElement) => {
     html2canvas(element)
       .then((canvas) => {
+        console.timeEnd('takeScreenshot')
+
         const name = `screenshot-${new Date().getTime()}.png`
 
-        setScreenshots((screenshots) => {
-          return screenshots.concat([
+        setScreenshots((screenshots) =>
+          screenshots.concat([
             {
               token: '',
               src: canvas.toDataURL(),
@@ -86,7 +88,7 @@ export const useScreenshot = (initialValue: Screenshot[] = []) => {
               name,
             },
           ])
-        })
+        )
 
         canvas.toBlob((blob) => {
           const file = new File([blob], name, {

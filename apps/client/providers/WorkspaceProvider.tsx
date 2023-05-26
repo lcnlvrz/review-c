@@ -14,8 +14,6 @@ export const WorkspaceContext = createContext<WorkspaceContext>({
 export const WorkspaceProvider = (
   props: React.PropsWithChildren<WorkspaceContext>
 ) => {
-  console.log('props.currentWorkspace', props.currentWorkspace)
-
   return (
     <WorkspaceContext.Provider
       value={{

@@ -1,16 +1,17 @@
-import { InspectElements } from '@/../../packages/core/components/InspectElements'
 import { useAuth, useCurrentWorkspace } from '@/atoms/pageProps'
 import { BASE_URL_API } from '@/http/client'
 import { useReviewDetail } from '@/providers/ReviewDetailProvider'
 import { HttpClient } from 'clients'
 import {
+  GridPoints,
   HTTPClientProvider,
   InspectElementsLayer,
   InspectElementsProvider,
+  ReviewProvider,
+  Toolkit,
 } from 'core'
-import { GridPoints, ReviewProvider, Toolkit } from 'core'
 import dynamic from 'next/dynamic'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Badge } from 'ui'
 
 const FileViewer = dynamic(() => import('./FileViewer'), { ssr: false })

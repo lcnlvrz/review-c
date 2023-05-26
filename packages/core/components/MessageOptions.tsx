@@ -1,15 +1,19 @@
+import { useReview } from '../providers/ReviewProvider'
 import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
 import { Edit2, MoreHorizontal, Trash } from 'lucide-react'
-import { Button, Popover, PopoverContent, PopoverTrigger } from 'ui'
+import { Button, Popover, PopoverContent, PopoverTrigger, cn } from 'ui'
 
 export const MessageOptions = (props: {
   onDelete: () => void
   onEdit: () => void
+  className?: string
 }) => {
-  const portal = getContentShadowDomRef()
+  const ctx = useReview()
+
+  const portal = getContentShadowDomRef(ctx.PORTAL_SHADOW_ID)
 
   return (
-    <div className="absolute top-0 right-0 p-4">
+    <div className={cn('absolute top-0 right-0', props.className)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button

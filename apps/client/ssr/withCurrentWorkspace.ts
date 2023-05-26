@@ -24,8 +24,6 @@ export const withCurrentWorkspace: SSFunction<{
       cookie
     )
 
-    console.log('workspace', workspace)
-
     return {
       props: {
         currentWorkspace: workspace,
