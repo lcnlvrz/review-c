@@ -9,4 +9,8 @@ export const currentWorkspaceAtom = atom(
   (get) => get(pagePropsAtom).currentWorkspace
 )
 
+export const authAtom = atom((get) => get(pagePropsAtom).auth)
+
 export const useCurrentWorkspace = () => useAtomValue(currentWorkspaceAtom)
+
+export const useAuth = () => useAtomValue(authAtom)

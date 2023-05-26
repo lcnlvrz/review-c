@@ -1,3 +1,8 @@
+import { useAPI } from '../hooks/useAPI'
+import { useDisclosure } from '../hooks/useDisclosure'
+import { useReview } from '../providers/ReviewProvider'
+import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
+import { buildReviewDetailQueryKey } from '../utils/query-key-builders'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import {
@@ -10,21 +15,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from 'ui'
-import { useAPI } from '~hooks/useAPI'
-import type { useDisclosure } from '~hooks/useDisclosure'
-import { buildReviewDetailQueryKey } from '~hooks/useReviewDetail'
-import { getContentShadowDomRef } from '~lib/get-content-shadow-dom-ref'
-import { useReview } from '~providers/ReviewProvider'
 
 export const ConfirmDeleteThread = (props: {
   ctrl: ReturnType<typeof useDisclosure>
   onClose: () => void
   threadId: number
 }) => {
-  const portal = getContentShadowDomRef()
-
   const reviewAPI = useAPI('review')
   const ctx = useReview()
+
+  const portal = getContentShadowDomRef(ctx.PORTAL_SHADOW_ID)
 
   const queryClient = useQueryClient()
 

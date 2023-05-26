@@ -102,7 +102,7 @@ export const WebsiteReviewDetail = () => {
 
       <div className="flex flex-col space-y-5">
         <div className="flex flex-row items-center space-x-2">
-          <Badge className="mt-5">{review.type}</Badge>
+          <Badge>{review.type}</Badge>
           <div className="flex flex-row space-x-2">
             <Globe />
             <a

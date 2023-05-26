@@ -15,5 +15,11 @@ export const configApp = async (app: INestApplication) => {
     origin: '*',
   })
 
+  app.use((req, res, next) => {
+    console.log('request received', req.path, req.method)
+
+    next()
+  })
+
   app.use(cookieParser())
 }

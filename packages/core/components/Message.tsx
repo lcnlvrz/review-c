@@ -1,8 +1,10 @@
-import { ImageGallery } from './ImageGallery'
+import { useReview } from '../providers/ReviewProvider'
+import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
 import { composeUserName, type MessagePopulated } from 'common'
 import dayjs from 'dayjs'
 import { Smartphone, Monitor } from 'lucide-react'
 import React from 'react'
+import { cn, ImageGallery } from 'ui'
 import {
   Avatar,
   AvatarFallback,
@@ -12,7 +14,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from 'ui'
-import { cn } from '~lib/utils'
 
 export const MessageContainer = React.forwardRef<
   HTMLDivElement,
@@ -22,7 +23,7 @@ export const MessageContainer = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        'absolute border-gray-400 w-96 border shadow-lg rounded-2xl flex flex-col bg-white [&>*:not([role="divider"])]:p-4',
+        'absolute border-gray-400 w-96 border shadow-lg rounded-2xl flex flex-col bg-white [&>*:not([role="divider"])]:p-4 z-50',
         className
       )}
       {...props}
@@ -42,8 +43,10 @@ export const MessageContent = React.forwardRef<
     isMobile?: boolean
   }
 >(({ className, focus, renderTooltip, isMobile, children, ...props }, ref) => {
+  const ctx = useReview()
+
   const dateDisplay = (
-    <p className="text-sm text-gray-400">
+    <p className="text-xs text-gray-400">
       {dayjs(props.message.createdAt).fromNow()}
     </p>
   )
@@ -79,8 +82,12 @@ export const MessageContent = React.forwardRef<
         )}
       </div>
       <p className="text-sm break-all !py-0 m-0">{props.message.content}</p>
+
       {props.message.files.length > 0 && (
-        <ImageGallery images={props.message.files} />
+        <ImageGallery
+          portalRef={getContentShadowDomRef(ctx.PORTAL_SHADOW_ID)}
+          images={props.message.files}
+        />
       )}
 
       {children}

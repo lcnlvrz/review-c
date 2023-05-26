@@ -4,13 +4,9 @@ import { StartThreadInput } from 'common'
 
 export class CreateThreadDTO extends AddMessageDTO implements StartThreadInput {
   @IsNumber()
-  @Min(0)
-  @Max(100)
   xPercentage: number
 
   @IsNumber()
-  @Min(0)
-  @Max(100)
   yPercentage: number
 
   @IsString()

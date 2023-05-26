@@ -1,62 +1,22 @@
+import { useAPI } from '../hooks/useAPI'
+import { useDisclosure } from '../hooks/useDisclosure'
+import { useScreenshot } from '../hooks/useScreenshot'
+import { useReview } from '../providers/ReviewProvider'
+import { MessageSchema, messageSchema } from '../schemas/message.schema'
+import { discriminateMessages } from '../utils/discriminate-messages'
+import { buildReviewDetailQueryKey } from '../utils/query-key-builders'
 import { ConfirmDeleteThread } from './ConfirmDeleteThread'
-import { InspectElements } from './InspectElements'
 import { MessageContainer, MessageContent } from './Message'
 import { MessageInput } from './MessageInput'
 import { MessageOptions } from './MessageOptions'
-import { Button } from './button/button'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
+import { AddMessageToThreadInput, MessagePopulated } from 'common'
 import type { Point } from 'database'
-import {
-  Cloud,
-  CreditCard,
-  Github,
-  Keyboard,
-  LifeBuoy,
-  LogOut,
-  Mail,
-  MessageCircle,
-  MessageSquare,
-  MoreHorizontal,
-  MoreVertical,
-  Plus,
-  PlusCircle,
-  Settings,
-  User,
-  UserPlus,
-  Users,
-} from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-  ScrollArea,
-  Separator,
-} from 'ui'
-import type {
-  AddMessageToThreadInput,
-  MessagePopulated,
-} from '~../../packages/common'
-import { useAPI } from '~hooks/useAPI'
-import { useDisclosure } from '~hooks/useDisclosure'
-import { buildReviewDetailQueryKey } from '~hooks/useReviewDetail'
-import { useScreenshot } from '~hooks/useScreenshot'
-import { discriminateMessages } from '~lib/discriminate-messages'
-import { getContentShadowDomRef } from '~lib/get-content-shadow-dom-ref'
-import { useReview } from '~providers/ReviewProvider'
-import { messageSchema, type MessageSchema } from '~schemas/message.schema'
-import { type PointSchema } from '~schemas/point.schema'
+import { ScrollArea, Separator, cn } from 'ui'
 
 interface MessageFormProps {
   onSubmit: (data: AddMessageToThreadInput, onDone: () => void) => void
@@ -123,15 +83,12 @@ const MessageForm = (props: MessageFormProps) => {
     },
   })
 
-  const inspectElementsCtrl = useDisclosure()
-
   return (
     <MessageInput
       height="h-20"
       screenshotsCtrl={screenshotsCtrl}
       point={props.point}
       formCtrl={formCtrl}
-      inspectElementsCtrl={inspectElementsCtrl}
       onSubmit={(data) => {
         props.onSubmit(
           {
@@ -236,10 +193,6 @@ export const Thread = (props: {
 }) => {
   const ctx = useReview()
 
-  const [isLoading, setIsLoading] = useState(false)
-
-  const screenshotsCtrl = useScreenshot()
-
   const deleteThreadCtrl = useDisclosure()
 
   const editCtrl = useDisclosure()
@@ -248,11 +201,7 @@ export const Thread = (props: {
 
   const queryClient = useQueryClient()
 
-  const inspectElementsCtrl = useDisclosure()
-
   const bottomMessageList = useRef<HTMLDivElement>(null)
-
-  console.log('editCtrl', editCtrl)
 
   const onUpdateMessage = useCallback(
     (messageId: number, data: AddMessageToThreadInput, onDone: () => void) => {
@@ -307,85 +256,79 @@ export const Thread = (props: {
   }, [props.messages.length])
 
   return (
-    <>
-      {ctx.mustShowAbsoluteElements && (
-        <MessageContainer>
-          <div className="relative">
-            {editCtrl.isOpen ? (
-              <MessageForm
-                onSubmit={(data, onDone) =>
-                  onUpdateMessage(starterMessage.id, data, onDone)
+    <MessageContainer
+      className={cn({
+        hidden: !ctx.mustShowAbsoluteElements,
+      })}
+    >
+      <div className="relative">
+        {editCtrl.isOpen ? (
+          <MessageForm
+            onSubmit={(data, onDone) =>
+              onUpdateMessage(starterMessage.id, data, onDone)
+            }
+            defaultValues={starterMessage}
+            threadId={props.threadId}
+            point={props.point}
+          />
+        ) : (
+          <MessageContent
+            className="!m-0"
+            renderTooltip={
+              <MessageContext
+                browser={props.point.browser}
+                os={props.point.os}
+                windowHeight={props.point.windowHeight}
+                windowWidth={props.point.windowWidth}
+              />
+            }
+            focus
+            message={starterMessage}
+          />
+        )}
+
+        {ctx.auth.id === props.startedById && (
+          <>
+            <ConfirmDeleteThread
+              threadId={props.threadId}
+              onClose={deleteThreadCtrl.onClose}
+              ctrl={deleteThreadCtrl}
+            />
+            <MessageOptions
+              className="p-4"
+              onEdit={editCtrl.toggle}
+              onDelete={deleteThreadCtrl.toggle}
+            />
+          </>
+        )}
+      </div>
+
+      <div className="!py-0 flex flex-row items-center space-x-1 text-gray-500">
+        <MessageCircle className="h-5 w-5" />
+        <p>{subsequentMessages.length} replies</p>
+      </div>
+      <Separator className="mt-4 bg-gray-100" />
+      {subsequentMessages.length > 0 && (
+        <ScrollArea className="h-40">
+          <div className="flex flex-col space-y-8">
+            {subsequentMessages.map((message, index) => (
+              <Reply
+                key={index}
+                message={message}
+                onDelete={() => deleteMessage(message.id)}
+                onUpdate={(data, onDone) =>
+                  onUpdateMessage(message.id, data, onDone)
                 }
-                defaultValues={starterMessage}
-                threadId={props.threadId}
                 point={props.point}
+                threadId={props.threadId}
               />
-            ) : (
-              <MessageContent
-                className="!m-0"
-                renderTooltip={
-                  <MessageContext
-                    browser={props.point.browser}
-                    os={props.point.os}
-                    windowHeight={props.point.windowHeight}
-                    windowWidth={props.point.windowWidth}
-                  />
-                }
-                focus
-                message={starterMessage}
-              />
-            )}
-
-            {ctx.auth.id === props.startedById && (
-              <>
-                <ConfirmDeleteThread
-                  threadId={props.threadId}
-                  onClose={deleteThreadCtrl.onClose}
-                  ctrl={deleteThreadCtrl}
-                />
-                <MessageOptions
-                  onEdit={editCtrl.toggle}
-                  onDelete={deleteThreadCtrl.toggle}
-                />
-              </>
-            )}
+            ))}
+            <div ref={bottomMessageList} />
           </div>
-
-          <div className="!py-0 flex flex-row items-center space-x-1 text-gray-500">
-            <MessageCircle className="h-5 w-5" />
-            <p>{subsequentMessages.length} replies</p>
-          </div>
-          <Separator className="mt-4 bg-gray-100" />
-          {subsequentMessages.length > 0 && (
-            <ScrollArea className="max-h-60">
-              <div className="flex flex-col space-y-8">
-                {subsequentMessages.map((message, index) => (
-                  <Reply
-                    key={index}
-                    message={message}
-                    onDelete={() => deleteMessage(message.id)}
-                    onUpdate={(data, onDone) =>
-                      onUpdateMessage(message.id, data, onDone)
-                    }
-                    point={props.point}
-                    threadId={props.threadId}
-                  />
-                ))}
-                <div ref={bottomMessageList} />
-              </div>
-            </ScrollArea>
-          )}
-
-          <AddMessageToThread point={props.point} threadId={props.threadId} />
-        </MessageContainer>
+        </ScrollArea>
       )}
 
-      {inspectElementsCtrl.isOpen && (
-        <InspectElements
-          onClose={inspectElementsCtrl.onClose}
-          onSelectElement={screenshotsCtrl.takeScreenshot}
-        />
-      )}
-    </>
+      <AddMessageToThread point={props.point} threadId={props.threadId} />
+    </MessageContainer>
   )
 }

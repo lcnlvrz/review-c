@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from './avatar/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from 'ui'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'ui'
 
 export const MarkerAvatar = ({ src, name }: { src: string; name: string }) => {

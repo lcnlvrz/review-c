@@ -36,8 +36,9 @@ export const useScreenshot = (initialValue: Screenshot[] = []) => {
         xhr.upload.onprogress = (e) => {
           const progress = Math.ceil((e.loaded / e.total) * 100)
 
-          setScreenshots((screenshots) =>
-            screenshots.map((screenshot) => {
+          setScreenshots((screenshots) => {
+            console.log('screenshots on xr', screenshots)
+            return screenshots.map((screenshot) => {
               if (screenshot.name === file.name) {
                 screenshot.progress = progress
                 return screenshot
@@ -45,15 +46,16 @@ export const useScreenshot = (initialValue: Screenshot[] = []) => {
 
               return screenshot
             })
-          )
+          })
         }
 
         xhr.send(form)
 
         xhr.onload = function () {
           if (this.status >= 200 && this.status < 300) {
-            setScreenshots((screenshots) =>
-              screenshots.map((screenshot) => {
+            setScreenshots((screenshots) => {
+              console.log('screenshots on xr', screenshots)
+              return screenshots.map((screenshot) => {
                 if (screenshot.name === file.name) {
                   screenshot.isLoading = false
                   screenshot.token = res.token
@@ -62,39 +64,44 @@ export const useScreenshot = (initialValue: Screenshot[] = []) => {
 
                 return screenshot
               })
-            )
+            })
           }
         }
       })
+      .catch(console.error)
   }, [])
 
   const takeScreenshot = useCallback((element: HTMLElement) => {
-    html2canvas(element).then((canvas) => {
-      const name = `screenshot-${new Date().getTime()}.png`
+    html2canvas(element)
+      .then((canvas) => {
+        console.timeEnd('takeScreenshot')
 
-      setScreenshots((screenshots) =>
-        screenshots.concat([
-          {
-            token: '',
-            src: canvas.toDataURL(),
-            isLoading: true,
-            progress: 0,
-            name,
-          },
-        ])
-      )
+        const name = `screenshot-${new Date().getTime()}.png`
 
-      canvas.toBlob((blob) => {
-        const file = new File([blob], name, {
-          type: 'image/png',
+        setScreenshots((screenshots) =>
+          screenshots.concat([
+            {
+              token: '',
+              src: canvas.toDataURL(),
+              isLoading: true,
+              progress: 0,
+              name,
+            },
+          ])
+        )
+
+        canvas.toBlob((blob) => {
+          const file = new File([blob], name, {
+            type: 'image/png',
+          })
+
+          uploadScreenshot(file)
         })
-
-        uploadScreenshot(file)
       })
-    })
+      .catch(console.error)
   }, [])
 
-  const removeScreenshot = useCallback((index) => {
+  const removeScreenshot = useCallback((index: number) => {
     setScreenshots((screenshots) => screenshots.filter((_, i) => i !== index))
   }, [])
 
@@ -102,7 +109,12 @@ export const useScreenshot = (initialValue: Screenshot[] = []) => {
     setScreenshots((screenshots) => screenshots.concat([screenshot]))
   }, [])
 
-  const clearScreenshots = useCallback(() => setScreenshots([]), [])
+  const clearScreenshots = useCallback(() => {
+    setScreenshots([])
+    console.log('clear')
+  }, [])
+
+  console.log('screenshots', screenshots)
 
   return {
     screenshots,

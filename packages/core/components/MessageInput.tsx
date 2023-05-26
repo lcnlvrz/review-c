@@ -1,30 +1,24 @@
-import { ImageGallery } from './ImageGallery'
+import { useScreenshot } from '../hooks/useScreenshot'
+import { useInspectElements } from '../providers/InspectElementsProvider'
+import { useReview } from '../providers/ReviewProvider'
+import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
 import type { MarkerPoint } from './PointMarker'
-import { Textarea } from './Textarea'
 import { Camera, Plus, Send } from 'lucide-react'
 import React, { useCallback } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
-import type { useDisclosure } from '~hooks/useDisclosure'
-import type { useScreenshot } from '~hooks/useScreenshot'
-import { cn } from '~lib/utils'
-import { useReview } from '~providers/ReviewProvider'
+import { ImageGallery, Textarea, cn, Button } from 'ui'
 
 export const MessageInput = <T extends object>(props: {
   height?: `h-${number}`
   className?: string
   formCtrl: UseFormReturn<T>
-  inspectElementsCtrl: ReturnType<typeof useDisclosure>
   screenshotsCtrl: ReturnType<typeof useScreenshot>
   point: Pick<Extract<MarkerPoint, { visible: true }>, 'left' | 'top'>
   onSubmit: (data: T) => void
 }) => {
-  const ctx = useReview()
+  const { inspectElements } = useInspectElements()
 
-  const startInspectingElements = useCallback(() => {
-    ctx.blurCursor()
-    ctx.hideAbsoluteElements()
-    props.inspectElementsCtrl.onOpen()
-  }, [])
+  const ctx = useReview()
 
   const onUploadImage = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,6 +63,7 @@ export const MessageInput = <T extends object>(props: {
 
       {props.screenshotsCtrl.screenshots.length > 0 && (
         <ImageGallery
+          portalRef={getContentShadowDomRef(ctx.PORTAL_SHADOW_ID)}
           onRemove={props.screenshotsCtrl.removeScreenshot}
           images={props.screenshotsCtrl.screenshots}
         />
@@ -88,25 +83,31 @@ export const MessageInput = <T extends object>(props: {
               />
             </div>
 
-            <button
-              onClick={props.screenshotsCtrl.removeScreenshot}
+            <Button
+              variant="ghost"
               title="Add files"
               className="group-hover:bg-primary group rounded-full p-1 transition-all"
             >
               <Plus className="text-gray-500 group-hover:text-white w-[20px] text-xs" />
-            </button>
+            </Button>
           </div>
 
-          <button
-            onClick={startInspectingElements}
+          <Button
+            variant="ghost"
+            onClick={() => {
+              inspectElements().then((element) =>
+                props.screenshotsCtrl.takeScreenshot(element)
+              )
+            }}
             title="Take a screenshot"
             className="hover:bg-primary group rounded-full p-1 transition-all"
           >
             <Camera className="text-gray-500 group-hover:text-white w-[20px] text-xs" />
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
+          variant="ghost"
           onClick={() => props.onSubmit(props.formCtrl.getValues())}
           disabled={
             props.screenshotsCtrl.screenshots.some((s) => s.isLoading) ||
@@ -116,7 +117,7 @@ export const MessageInput = <T extends object>(props: {
           className="hover:bg-primary rounded-full group p-1 transition-all "
         >
           <Send className="text-gray-500 w-[20px] text-xs group-hover:text-white" />
-        </button>
+        </Button>
       </div>
     </div>
   )

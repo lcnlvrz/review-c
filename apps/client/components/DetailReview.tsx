@@ -1,6 +1,10 @@
-import { FileReviewDetail } from './FileReviewDetail'
 import { WebsiteReviewDetail } from './WebsiteReviewDetail'
 import { useReviewDetail } from '@/providers/ReviewDetailProvider'
+import dynamic from 'next/dynamic'
+
+const FileReviewDetail = dynamic(() => import('./FileReviewDetail'), {
+  ssr: false,
+})
 
 const ReviewTypesDetail = () => {
   const review = useReviewDetail()
@@ -25,7 +29,9 @@ export const DetailReview = () => {
             <h1>Reviews</h1>
             <h2 className="text-5xl text-gray-300">{review.title}</h2>
           </div>
-          <ReviewTypesDetail />
+          <div>
+            <ReviewTypesDetail />
+          </div>
         </div>
       </div>
     </div>

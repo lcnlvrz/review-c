@@ -1,44 +1,35 @@
+import { useReview } from '../providers/ReviewProvider'
 import { Cursor } from './Cursor'
-import { GridPoints } from './GridPoints'
+import { MessageCircle } from 'lucide-react'
+import { useRef } from 'react'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from './Tooltip'
-import { WaitForQuery } from './WaitForQuery'
-import { MessageCircle } from 'lucide-react'
-import { useRef } from 'react'
-import { useReviewDetail } from '~hooks/useReviewDetail'
-import type { Host } from '~lib/resolve-host'
-import { cn } from '~lib/utils'
-import { useReview } from '~providers/ReviewProvider'
+  cn,
+} from 'ui'
 
-export const ReviewToolkit = (props: { host: Host }) => {
+export const TOOLKIT_CONTAINER_ID = 'toolkit-container'
+
+export const Toolkit = () => {
   const ref = useRef<HTMLDivElement>()
   const ctx = useReview()
 
-  const query = useReviewDetail({
-    host: props.host,
-  })
-
   return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation()
-      }}
-    >
-      <WaitForQuery query={query}>
-        {({ data }) => {
-          return <GridPoints threads={data?.threads} />
-        }}
-      </WaitForQuery>
-      {ctx.cursorFocused && <Cursor />}
+    <>
+      <Cursor focus={ctx.cursorFocused} />
       <div
+        id={TOOLKIT_CONTAINER_ID}
         ref={ref}
-        className="fixed w-[10rem] bottom-0 p-3 right-[50%] left-[50%]"
+        className={cn(
+          'fixed bottom-0 p-3 left-[50%] -translate-x-[50%] z-[50]',
+          {
+            hidden: !ctx.mustShowAbsoluteElements,
+          }
+        )}
       >
-        <div className="flex items-center justify-start w-full">
+        <div className="flex items-center justify-start">
           <div className="bg-primary flex items-center border-[1px] border-gray-400 w-full p-2 h-[3rem] rounded-full">
             <TooltipProvider>
               <Tooltip>
@@ -58,6 +49,6 @@ export const ReviewToolkit = (props: { host: Host }) => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

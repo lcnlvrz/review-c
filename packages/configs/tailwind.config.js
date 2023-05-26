@@ -6,6 +6,7 @@ module.exports = {
   mode: 'jit',
   darkMode: ['class', '[data-theme="dark"]'],
   content: [
+    path.join(path.dirname(require.resolve('core')), '**/*.tsx'),
     path.join(path.dirname(require.resolve('ui')), '**/*.tsx'),
     './**/*.tsx',
     './app/**/*.{js,ts,jsx,tsx}',

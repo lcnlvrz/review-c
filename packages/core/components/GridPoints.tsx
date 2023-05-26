@@ -1,9 +1,9 @@
-import { PointMarker, type MarkerPoint } from './PointMarker'
+import { useReview } from '../providers/ReviewProvider'
+import { queryDomElemXPath } from '../utils/query-dom-elem-xpath'
+import { MarkerPoint, PointMarker } from './PointMarker'
 import { StagedPoint, StagedPointListener } from './StagedPoint'
 import type { ThreadPopulated } from 'common'
 import { useCallback, useEffect, useState } from 'react'
-import { queryDomElemXPath } from '~lib/query-dom-elem-xpath'
-import { useReview } from '~providers/ReviewProvider'
 
 export const GridPoints = (props: { threads: ThreadPopulated[] }) => {
   const [stagedPoint, setStagedPoint] = useState<MarkerPoint>()
@@ -74,7 +74,6 @@ export const GridPoints = (props: { threads: ThreadPopulated[] }) => {
 
   useEffect(() => {
     setCommittedPoints(iterateReviewThreads(props.threads))
-    console.log('recalculated commited points!')
   }, [props.threads])
 
   useEffect(() => {

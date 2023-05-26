@@ -1,16 +1,18 @@
+import { useDisclosure } from '../hooks/useDisclosure'
+import { useReview } from '../providers/ReviewProvider'
+import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
+import { AbsoluteContainer } from './AbsoluteContainer'
 import { MarkerAvatar } from './MarkerAvatar'
 import { MessageContent } from './Message'
 import { Thread } from './Thread'
-import { composeUserName, type MessagePopulated } from 'common'
-import type { Message } from 'common'
-import type { Point, User } from 'database'
-import dayjs from 'dayjs'
-import { MessageCircle, Monitor, Smartphone } from 'lucide-react'
-import React, { useState, type HTMLProps } from 'react'
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
+  composeUserName,
+  discriminateMessages,
+  type MessagePopulated,
+} from 'common'
+import type { Point, User } from 'database'
+import { MessageCircle } from 'lucide-react'
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -18,12 +20,8 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  cn,
 } from 'ui'
-import { useDisclosure } from '~hooks/useDisclosure'
-import { discriminateMessages } from '~lib/discriminate-messages'
-import { getContentShadowDomRef } from '~lib/get-content-shadow-dom-ref'
-import { cn } from '~lib/utils'
-import { useReview } from '~providers/ReviewProvider'
 
 interface CommonPointProps<TVisible extends boolean = true>
   extends Omit<Point, 'id' | 'createdById'> {
@@ -47,7 +45,7 @@ export type MarkerPoint =
 
 export const PointMarker = (props: {
   point: Extract<MarkerPoint, { visible: true }>
-  messages: Omit<MessagePopulated, 'id'>[]
+  messages: MessagePopulated[]
   isStagedPoint?: boolean
 }) => {
   const popover = useDisclosure()
@@ -61,29 +59,22 @@ export const PointMarker = (props: {
     <div>
       {ctx.mustShowAbsoluteElements && (
         <div>
-          <div
-            className={cn(`absolute z-1`)}
-            style={{
-              transform: `translate(${props.point.left}px, ${props.point.top}px)`,
-            }}
-          >
+          <AbsoluteContainer point={props.point}>
             <div className="bg-white p-2 rounded-full shadow-lg border-gray-400 border">
               <MessageCircle className="-scale-x-1 text-primary" />
             </div>
-          </div>
-          <div
-            className={cn(`absolute z-1`)}
-            style={{
-              transform: `translate(${props.point.left + 25}px, ${
-                props.point.top
-              }px)`,
+          </AbsoluteContainer>
+          <AbsoluteContainer
+            point={{
+              left: props.point.left + 25,
+              top: props.point.top,
             }}
           >
             <MarkerAvatar
               src={props.point.createdBy.avatar}
               name={composeUserName(props.point.createdBy)}
             />
-          </div>
+          </AbsoluteContainer>
         </div>
       )}
 
@@ -100,11 +91,9 @@ export const PointMarker = (props: {
               delayDuration={0}
             >
               <TooltipTrigger asChild>
-                <div
-                  className={cn(`absolute z-10 h-10 w-20`)}
-                  style={{
-                    transform: `translate(${props.point.left}px, ${props.point.top}px)`,
-                  }}
+                <AbsoluteContainer
+                  className={cn(`z-10 h-10 w-20`)}
+                  point={props.point}
                 />
               </TooltipTrigger>
               <TooltipContent
@@ -132,16 +121,15 @@ export const PointMarker = (props: {
             }}
           >
             <PopoverTrigger asChild>
-              <div
-                className={cn(`absolute z-1 h-10 w-20`)}
-                style={{
-                  transform: `translate(${props.point.left}px, ${props.point.top}px)`,
-                }}
+              <AbsoluteContainer
+                className={cn(`z-1 h-10 w-20`)}
+                point={props.point}
               />
             </PopoverTrigger>
+
             <PopoverContent
               className="border-none outline-none p-0"
-              container={getContentShadowDomRef()}
+              container={getContentShadowDomRef(ctx.PORTAL_SHADOW_ID)}
             >
               <Thread
                 startedById={props.point.startedById}
