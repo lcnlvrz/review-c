@@ -6,10 +6,11 @@ import {
   Toolkit,
   HTTPClientProvider,
   InspectElementsLayer,
+  mustGetHtmlTag,
 } from 'core'
 import cssText from 'data-text:~/styles.css'
 import type { User } from 'database'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { GridPointsAwaited } from '~components/GridPointsAwaited'
 import { PORTAL_ID, WaitForHost } from '~components/WaitForHost'
 import { useAuth } from '~hooks/useAuth'

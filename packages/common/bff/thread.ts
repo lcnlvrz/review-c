@@ -1,9 +1,9 @@
+import type { MarkerPopulated } from './marker'
 import type { MessagePopulated } from './message'
-import type { PointPopulated } from './point'
 import type { Thread, User } from 'database'
 
 export interface ThreadPopulated extends Thread {
   messages: MessagePopulated[]
-  point: PointPopulated
+  marker: MarkerPopulated
   startedBy: User
 }

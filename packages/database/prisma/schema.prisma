@@ -24,7 +24,7 @@ model User {
   reviewUsers       ReviewUser[]
   messages          Message[]
   threads           Thread[]
-  points            Point[]
+  markers           Marker[]
 }
 
 model IdentityProvider {
@@ -125,23 +125,52 @@ model Message {
   @@index([sentById])
 }
 
+enum MarkerType {
+  point
+  selection
+}
+
+model Selection {
+  id                     Int      @id @default(autoincrement())
+  startChildrenNodeIndex Int
+  endChildrenNodeIndex   Int
+  startContainerXPath    String
+  startOffset            Int
+  endOffset              Int
+  endContainerXPath      String
+  Marker                 Marker[]
+}
+
 model Point {
+  id          Int      @id @default(autoincrement())
+  xPath       String
+  xPercentage Float
+  yPercentage Float
+  Marker      Marker[]
+}
+
+model Marker {
   id          Int      @id @default(autoincrement())
   createdAt   DateTime @default(now())
   createdBy   User     @relation(fields: [createdById], references: [id])
   createdById Int
 
-  xPath        String
-  xPercentage  Float
-  yPercentage  Float
+  type      MarkerType
+  point     Point?     @relation(fields: [pointId], references: [id])
+  selection Selection? @relation(fields: [selectionId], references: [id])
+
   threads      Thread[]
   browser      String
   os           String
   isMobile     Boolean?
   windowWidth  Int
   windowHeight Int
+  pointId      Int?
+  selectionId  Int?
 
   @@index([createdById])
+  @@index([pointId])
+  @@index([selectionId])
 }
 
 model Thread {
@@ -154,11 +183,11 @@ model Thread {
   startedById Int
   review      Review    @relation(fields: [reviewId], references: [id])
   reviewId    String
-  pointId     Int
-  point       Point     @relation(fields: [pointId], references: [id])
+  markerId    Int
+  marker      Marker    @relation(fields: [markerId], references: [id])
 
   @@index([reviewId])
-  @@index([pointId])
+  @@index([markerId])
   @@index([startedById])
 }
 

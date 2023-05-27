@@ -1,6 +1,8 @@
 import { isMobile } from './is-mobile'
 import * as Bowser from 'bowser'
 
+export type UserAgentSpecs = ReturnType<typeof getUserAgentSpecs>
+
 export const getUserAgentSpecs = (userAgent: string) => {
   const { browser, os } = Bowser.parse(userAgent)
 

@@ -2,18 +2,18 @@ import { useScreenshot } from '../hooks/useScreenshot'
 import { useInspectElements } from '../providers/InspectElementsProvider'
 import { useReview } from '../providers/ReviewProvider'
 import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
-import type { MarkerPoint } from './PointMarker'
+import { PointCoordinates } from './MarkerElement'
 import { Camera, Plus, Send } from 'lucide-react'
 import React, { useCallback } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
-import { ImageGallery, Textarea, cn, Button } from 'ui'
+import { Button, cn, ImageGallery, Textarea } from 'ui'
 
 export const MessageInput = <T extends object>(props: {
   height?: `h-${number}`
   className?: string
   formCtrl: UseFormReturn<T>
   screenshotsCtrl: ReturnType<typeof useScreenshot>
-  point: Pick<Extract<MarkerPoint, { visible: true }>, 'left' | 'top'>
+  point: PointCoordinates
   onSubmit: (data: T) => void
 }) => {
   const { inspectElements } = useInspectElements()

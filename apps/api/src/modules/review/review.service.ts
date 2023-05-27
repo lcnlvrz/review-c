@@ -71,20 +71,27 @@ export class ReviewService {
   }) {
     const specs = getUserAgentSpecs(input.userAgent)
 
+    console.log('input.dto', input.dto)
+
     const thread = await this.dbService.thread.create({
       data: {
         pathname: input.dto.pathname,
-        point: {
+        marker: {
           create: {
             isMobile: specs.isMobile,
             browser: specs.browser,
             os: specs.os,
             windowHeight: input.dto.windowHeight,
             windowWidth: input.dto.windowWidth,
-            xPath: input.dto.xPath,
-            xPercentage: input.dto.xPercentage,
-            yPercentage: input.dto.yPercentage,
-            createdById: input.user.id,
+            type: input.dto.type,
+            [input.dto.type]: {
+              create: input.dto[input.dto.type],
+            },
+            createdBy: {
+              connect: {
+                id: input.user.id,
+              },
+            },
           },
         },
         startedBy: {
@@ -268,8 +275,10 @@ export class ReviewService {
             },
             include: {
               startedBy: true,
-              point: {
+              marker: {
                 include: {
+                  point: true,
+                  selection: true,
                   createdBy: true,
                 },
               },

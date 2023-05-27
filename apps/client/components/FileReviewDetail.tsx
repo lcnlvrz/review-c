@@ -3,7 +3,7 @@ import { BASE_URL_API } from '@/http/client'
 import { useReviewDetail } from '@/providers/ReviewDetailProvider'
 import { HttpClient } from 'clients'
 import {
-  GridPoints,
+  GridMarkers,
   HTTPClientProvider,
   InspectElementsLayer,
   InspectElementsProvider,
@@ -50,7 +50,7 @@ const FileReviewDetail = () => {
         >
           <InspectElementsProvider>
             <InspectElementsLayer />
-            <GridPoints threads={review.threads} />
+            <GridMarkers threads={review.threads} />
             <Toolkit />
           </InspectElementsProvider>
         </ReviewProvider>
