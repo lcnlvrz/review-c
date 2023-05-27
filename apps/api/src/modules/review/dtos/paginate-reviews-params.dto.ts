@@ -1,17 +1,21 @@
-import { Transform } from 'class-transformer'
+import { Exclude, Expose, Transform } from 'class-transformer'
 import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator'
 import { PaginateReviewsInput } from 'common'
 
+@Exclude()
 export class OffsetPaginationParamsDTO {
+  @Expose()
   @Min(1)
   @IsNumber()
   @Transform(({ value }) => Number(value))
   page: number = 1
 
+  @Expose()
   @IsString()
   @IsOptional()
   search?: string
 
+  @Expose()
   @Min(1)
   @Max(30)
   @IsNumber()

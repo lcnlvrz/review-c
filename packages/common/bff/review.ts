@@ -1,13 +1,13 @@
 import type { ThreadPopulated } from './thread'
-import type { User, Review } from 'database'
+import type { User, Review, MarkerType, Point, Selection } from 'database'
 
 export interface StartThreadInput {
   pathname: string
   windowHeight: number
   windowWidth: number
-  xPath: string
-  xPercentage: number
-  yPercentage: number
+  type: MarkerType
+  point?: Omit<Point, 'id'>
+  selection?: Omit<Selection, 'id'>
   message: string
   files: string[]
 }

@@ -6,13 +6,14 @@ import { MessageSchema, messageSchema } from '../schemas/message.schema'
 import { discriminateMessages } from '../utils/discriminate-messages'
 import { buildReviewDetailQueryKey } from '../utils/query-key-builders'
 import { ConfirmDeleteThread } from './ConfirmDeleteThread'
+import { PointCoordinates } from './MarkerElement'
 import { MessageContainer, MessageContent } from './Message'
 import { MessageInput } from './MessageInput'
 import { MessageOptions } from './MessageOptions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { AddMessageToThreadInput, MessagePopulated } from 'common'
-import type { Point } from 'database'
+import type { Marker, Point } from 'database'
 import { MessageCircle } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -22,10 +23,7 @@ interface MessageFormProps {
   onSubmit: (data: AddMessageToThreadInput, onDone: () => void) => void
   defaultValues?: Partial<MessagePopulated>
   threadId: number
-  point: Omit<Point, 'id' | 'createdById'> & {
-    left: number
-    top: number
-  }
+  point: PointCoordinates
 }
 
 const AddMessageToThread = (props: Omit<MessageFormProps, 'onSubmit'>) => {
@@ -183,13 +181,11 @@ const Reply = (props: {
 }
 
 export const Thread = (props: {
+  marker: Marker
   startedById: number
   threadId: number
   messages: MessagePopulated[]
-  point: Omit<Point, 'id' | 'createdById'> & {
-    left: number
-    top: number
-  }
+  point: PointCoordinates
 }) => {
   const ctx = useReview()
 
@@ -276,10 +272,10 @@ export const Thread = (props: {
             className="!m-0"
             renderTooltip={
               <MessageContext
-                browser={props.point.browser}
-                os={props.point.os}
-                windowHeight={props.point.windowHeight}
-                windowWidth={props.point.windowWidth}
+                browser={props.marker.browser}
+                os={props.marker.os}
+                windowHeight={props.marker.windowHeight}
+                windowWidth={props.marker.windowWidth}
               />
             }
             focus

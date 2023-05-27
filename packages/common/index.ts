@@ -1,4 +1,6 @@
 export * from './bff/file'
+export * from './bff/marker'
+export * from './bff/point'
 export * from './bff/review'
 export * from './bff/thread'
 export * from './bff/message'
