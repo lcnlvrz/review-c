@@ -55,7 +55,7 @@ export const MessageInput = <T extends object>(props: {
       <Textarea
         {...props.formCtrl.register('message')}
         className={cn(
-          'min-w-[15rem] h-28 border-none p-2 text-black focus:outline-0 text-sm focus:ring-0 focus:border-transparent resize-none',
+          'outline-none ring-0 min-w-[15rem] h-28 border-none p-2 text-black focus:outline-0 text-sm focus:ring-0 focus:border-transparent resize-none focus:ring-offset-0',
           props.height
         )}
         placeholder="Reply..."

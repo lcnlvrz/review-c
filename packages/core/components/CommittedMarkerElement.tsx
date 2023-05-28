@@ -1,4 +1,5 @@
 import { useDisclosure } from '../hooks/useDisclosure'
+import { useFloatingMarker } from '../hooks/useFloatingMarker'
 import { useReview } from '../providers/ReviewProvider'
 import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
 import { AbsoluteContainer } from './AbsoluteContainer'
@@ -32,11 +33,13 @@ export const CommittedMarkerElement = (
 
   const { starterMessage } = discriminateMessages(props.messages)
 
+  const { floating } = useFloatingMarker(point)
+
   if (!point.visible) return
 
   return (
     <div>
-      <MarkerElement {...props} />
+      <MarkerElement {...props} ref={floating.refs.setReference} />
       <TooltipProvider>
         <Tooltip
           onOpenChange={tooltip.setIsOpen}
@@ -48,7 +51,7 @@ export const CommittedMarkerElement = (
           delayDuration={0}
         >
           <TooltipTrigger asChild>
-            <AbsoluteContainer className={cn(`z-10 h-10 w-20`)} point={point} />
+            <AbsoluteContainer className={cn(`z-40 h-10 w-20`)} point={point} />
           </TooltipTrigger>
           <TooltipContent
             className={'border border-gray-200 rounded-2xl w-96 p-4'}
@@ -65,9 +68,12 @@ export const CommittedMarkerElement = (
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+
       <Popover
         open={popover.isOpen}
         onOpenChange={(open) => {
+          console.log('open', open)
+
           if (!ctx.mustShowAbsoluteElements) return
 
           popover.setIsOpen(open)
@@ -75,11 +81,11 @@ export const CommittedMarkerElement = (
         }}
       >
         <PopoverTrigger asChild>
-          <AbsoluteContainer className={cn(`z-1 h-10 w-20`)} point={point} />
+          <AbsoluteContainer className={cn(`z-1 h-10 w-10`)} point={point} />
         </PopoverTrigger>
 
         <PopoverContent
-          className="border-none outline-none p-0"
+          className="border-none outline-none p-0 w-full"
           container={getContentShadowDomRef(ctx.PORTAL_SHADOW_ID)}
         >
           <Thread

@@ -1,4 +1,4 @@
-import { useAPI } from './useAPI'
+import { useAPI } from 'core'
 import { useQuery } from '@tanstack/react-query'
 import type { Host } from '~lib/resolve-host'
 

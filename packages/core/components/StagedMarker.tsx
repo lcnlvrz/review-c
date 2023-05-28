@@ -1,18 +1,19 @@
 import { useAPI } from '../hooks/useAPI'
+import { useFloatingMarker } from '../hooks/useFloatingMarker'
 import { useScreenshot } from '../hooks/useScreenshot'
 import { useReview } from '../providers/ReviewProvider'
 import { messageSchema, MessageSchema } from '../schemas/message.schema'
-import { PointSchema, pointSchema } from '../schemas/point.schema'
+import { PointSchema } from '../schemas/point.schema'
 import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
 import { getXPath } from '../utils/get-xpath'
 import { buildReviewDetailQueryKey } from '../utils/query-key-builders'
-import { AbsoluteContainer } from './AbsoluteContainer'
 import { CURSOR_ID } from './Cursor'
 import { StagedMarkerEle, TEXT_NODE_TYPE } from './GridMarkers'
-import { MarkerElement, MarkerPopulatedCalculated } from './MarkerElement'
+import { MarkerElement } from './MarkerElement'
 import { MessageContainer } from './Message'
 import { MessageInput } from './MessageInput'
 import { TOOLKIT_CONTAINER_ID } from './Toolkit'
+import { autoPlacement, shift, useFloating } from '@floating-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { getUserAgentSpecs, UserAgentSpecs } from 'common'
@@ -77,8 +78,10 @@ export const StagedMarker = (props: {
         })
         .finally(() => setIsLoading(false))
     },
-    [ctx.reviewSession, screenshotsCtrl.screenshots.length]
+    [ctx.reviewSession, screenshotsCtrl.screenshots.length, props.stagedMarker]
   )
+
+  const { floating } = useFloatingMarker(point)
 
   if (!point.visible) return
 
@@ -88,23 +91,23 @@ export const StagedMarker = (props: {
         hidden: !ctx.mustShowAbsoluteElements,
       })}
     >
-      <MarkerElement messages={[]} marker={props.stagedMarker} />
-      <AbsoluteContainer
-        point={{
-          top: point.top,
-          left: point.left + 68,
-        }}
+      <MarkerElement
+        ref={floating.refs.setReference}
+        messages={[]}
+        marker={props.stagedMarker}
+      />
+      <MessageContainer
+        style={floating.floatingStyles}
+        ref={floating.refs.setFloating}
       >
-        <MessageContainer>
-          <MessageInput
-            className="rounded-t-2xl !p-3"
-            onSubmit={onStartThread}
-            formCtrl={methods}
-            point={point}
-            screenshotsCtrl={screenshotsCtrl}
-          />
-        </MessageContainer>
-      </AbsoluteContainer>
+        <MessageInput
+          className="rounded-t-2xl !p-3"
+          onSubmit={onStartThread}
+          formCtrl={methods}
+          point={point}
+          screenshotsCtrl={screenshotsCtrl}
+        />
+      </MessageContainer>
     </div>
   )
 }
@@ -185,8 +188,8 @@ export const StagedMarkerListener = (props: {
 
     if (
       !selection.toString() ||
-      endNode.nodeType !== TEXT_NODE_TYPE ||
-      startNode.nodeType !== TEXT_NODE_TYPE
+      (endNode.nodeType !== TEXT_NODE_TYPE &&
+        startNode.nodeType !== TEXT_NODE_TYPE)
     )
       return
 

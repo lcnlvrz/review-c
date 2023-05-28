@@ -13,7 +13,7 @@ import {
 } from 'common'
 import { Selection } from 'database'
 import { MessageCircle } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 export type PointCoordinates =
   | {
@@ -72,14 +72,13 @@ const SelectionHighlights = (
     <div className="selection-highlights">
       {selectionHighlights.map((highlight, index) => {
         return (
-          <div
+          <AbsoluteContainer
+            className="bg-black/10 pointer-events-none"
             key={index}
-            className="absolute bg-black/10 pointer-events-none"
+            point={highlight}
             style={{
               width: highlight.width,
               height: highlight.height,
-              top: highlight.top,
-              left: highlight.left,
             }}
           />
         )
@@ -88,25 +87,34 @@ const SelectionHighlights = (
   )
 }
 
-export const MarkerElement = (props: {
-  threadId?: number
-  marker: StagedMarkerEle
-  messages: MessagePopulated[]
-}) => {
+export const MarkerElement = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    threadId?: number
+    marker: StagedMarkerEle
+    messages: MessagePopulated[]
+  }
+>(({ threadId, marker, messages, ...props }, ref) => {
   const ctx = useReview()
 
-  const point = props.marker[props.marker.type]
+  const point = marker[marker.type]
 
-  if (!point.visible) return
+  if (!point.visible || !ctx.mustShowAbsoluteElements) return null
 
   return (
     <div>
-      {props.marker.type === 'selection' && (
-        <SelectionHighlights selection={props.marker.selection} />
+      {marker.type === 'selection' && (
+        <SelectionHighlights selection={marker.selection} />
       )}
+
       {ctx.mustShowAbsoluteElements && (
         <div>
-          <AbsoluteContainer point={point}>
+          <AbsoluteContainer
+            {...props}
+            ref={ref}
+            point={point}
+            className="z-20"
+          >
             <div className="bg-white p-2 rounded-full shadow-lg border-gray-400 border">
               <MessageCircle className="-scale-x-1 text-primary" />
             </div>
@@ -116,14 +124,15 @@ export const MarkerElement = (props: {
               left: point.left + 25,
               top: point.top,
             }}
+            className="z-30"
           >
             <MarkerAvatar
-              src={props.marker.createdBy.avatar}
-              name={composeUserName(props.marker.createdBy)}
+              src={marker.createdBy.avatar}
+              name={composeUserName(marker.createdBy)}
             />
           </AbsoluteContainer>
         </div>
       )}
     </div>
   )
-}
+})

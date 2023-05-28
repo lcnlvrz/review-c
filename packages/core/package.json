@@ -11,6 +11,8 @@
   "author": "Luciano Alvarez",
   "license": "ISC",
   "dependencies": {
+    "@floating-ui/dom": "^1.2.8",
+    "@floating-ui/react": "^0.24.1",
     "clients": "*",
     "common": "*",
     "database": "*",

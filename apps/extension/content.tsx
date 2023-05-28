@@ -35,7 +35,6 @@ const Layout = (props: {
   const [httpClient] = useState(
     () =>
       new HttpClient(API_BASE_URL, {
-        Cookie: `review-c_session=${props.token}`,
         Authorization: props.token,
       })
   )

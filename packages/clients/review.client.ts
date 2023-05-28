@@ -36,8 +36,14 @@ export class ReviewClient extends Client {
   }
 
   async deleteThread(workspaceId: string, reviewId: string, threadId: number) {
-    return await this.httpClient.delete(
+    await this.httpClient.delete(
       `/workspace/${workspaceId}/review/${reviewId}/thread/${threadId}`
+    )
+  }
+
+  async resolveThread(workspaceId: string, reviewId: string, threadId: number) {
+    await this.httpClient.put(
+      `/workspace/${workspaceId}/review/${reviewId}/thread/${threadId}/resolve`
     )
   }
 
@@ -47,7 +53,7 @@ export class ReviewClient extends Client {
     threadId: number,
     messageId: number
   ) {
-    return await this.httpClient.delete(
+    await this.httpClient.delete(
       `/workspace/${workspaceId}/review/${reviewId}/thread/${threadId}/message/${messageId}`
     )
   }
@@ -73,7 +79,7 @@ export class ReviewClient extends Client {
     messageId: number,
     data: AddMessageToThreadInput
   ) {
-    return await this.httpClient.put(
+    await this.httpClient.put(
       `/workspace/${workspaceId}/review/${reviewId}/thread/${threadId}/message/${messageId}`,
       data
     )

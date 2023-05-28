@@ -4,7 +4,7 @@ import type { User } from 'database'
 import { useCallback, useState } from 'react'
 
 export const useAuth = () => {
-  const [auth, setAuth] = useStorage<User>(`auth`)
+  const [auth, setAuth, { remove }] = useStorage<User>(`auth`)
   const [token] = useStorage<string>(`access_token`)
   const [isAuthenticating, setIsAuthenticating] = useState(false)
   const [error, setError] = useState(false)
@@ -27,7 +27,10 @@ export const useAuth = () => {
       .finally(() => setIsAuthenticating(false))
   }, [])
 
+  const logout = useCallback(() => remove(), [])
+
   return {
+    logout,
     auth,
     setAuth,
     requestSignIn,

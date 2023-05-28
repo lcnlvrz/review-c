@@ -97,14 +97,9 @@ export const GridMarkers = (props: { threads: ThreadPopulated[] }) => {
         case 'selection': {
           const { selection, point: _, ...rest } = marker
 
-          const node = queryDomElemXPath(selection.endContainerXPath)
+          const range = createSafeNodeRange(selection)
 
-          if (!node) {
-            console.log(
-              '[selection] not found nod with xpath',
-              selection.endContainerXPath
-            )
-
+          if (!range.toString()) {
             return {
               ...rest,
               selection: {
@@ -114,7 +109,6 @@ export const GridMarkers = (props: { threads: ThreadPopulated[] }) => {
             } as const
           }
 
-          const range = createSafeNodeRange(selection)
           const rects = range.getClientRects()
 
           const lastRect = rects[rects.length - 1]

@@ -23,7 +23,7 @@ export const MessageContainer = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        'absolute border-gray-400 w-96 border shadow-lg rounded-2xl flex flex-col bg-white [&>*:not([role="divider"])]:p-4 z-50',
+        'border-gray-400 w-[30rem] border shadow-lg rounded-2xl flex flex-col bg-white [&>*:not([role="divider"])]:p-4 z-50',
         className
       )}
       {...props}

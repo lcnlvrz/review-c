@@ -36,7 +36,7 @@ export const Cursor = (props: { focus?: boolean }) => {
       style={{
         pointerEvents: 'none',
       }}
-      className={cn('absolute', {
+      className={cn({
         hidden: !props.focus,
       })}
     >
