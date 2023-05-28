@@ -1,5 +1,7 @@
 # review-c
 
+_tl;dr: vercel comments overview open source alternative_
+
 ![Alt text](./static/review-c-white.png)
 
 An open-source review tool to review any website and files
