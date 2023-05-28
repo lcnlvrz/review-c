@@ -1,9 +1,7 @@
 import { useReview } from '../providers/ReviewProvider'
 import { createSafeNodeRange } from '../utils/create-safe-node-range'
-import { getContentShadowDomRef } from '../utils/get-content-shadow-dom-ref'
-import { queryDomElemXPath } from '../utils/query-dom-elem-xpath'
 import { AbsoluteContainer } from './AbsoluteContainer'
-import { StagedMarkerEle, TEXT_NODE_TYPE } from './GridMarkers'
+import { StagedMarkerEle } from './GridMarkers'
 import { MarkerAvatar } from './MarkerAvatar'
 import {
   composeUserName,
@@ -13,7 +11,7 @@ import {
 } from 'common'
 import { Selection } from 'database'
 import { MessageCircle } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export type PointCoordinates =
   | {
@@ -52,8 +50,6 @@ const SelectionHighlights = (
 
     const range = createSafeNodeRange(props.selection)
 
-    console.log('range highlight', range)
-
     const rects = range.getClientRects()
 
     for (let i = 0; i < rects.length; i++) {
@@ -69,8 +65,6 @@ const SelectionHighlights = (
 
     setSelectionHighlights(highlights)
   }, [props.selection])
-
-  console.log('highlights', selectionHighlights)
 
   return (
     <div className="selection-highlights">

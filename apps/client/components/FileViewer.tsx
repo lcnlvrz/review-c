@@ -15,9 +15,18 @@ import {
   TableBody,
   TableCell,
   Table,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
 } from 'ui'
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
 import 'react-pdf/dist/esm/Page/TextLayer.css'
+import { ReviewType } from '.prisma/client'
+import { reviewTypesOpts } from '@/constants/review'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`
 
@@ -41,18 +50,13 @@ const ImageViewer = (props: Props) => {
   )
 }
 
-const WIDTH_SUBTRACT = 250
-
 const PDFViewer = (props: Props) => {
   const [numPages, setNumPages] = useState<number>()
   const [pageNumber, setPageNumber] = useState(1)
   const [src] = useState(props.src)
 
-  const computeWidth = useCallback(() => {
-    return window.innerWidth - WIDTH_SUBTRACT
-  }, [])
-
-  const [width, setWidth] = useState(() => computeWidth())
+  const ref = useRef<HTMLDivElement>(undefined)
+  const pageRef = useRef<HTMLCanvasElement>(undefined)
 
   const onDocumentLoadSuccess = useCallback(
     ({ numPages }: { numPages: number }) => {
@@ -61,21 +65,49 @@ const PDFViewer = (props: Props) => {
     []
   )
 
-  const onWithChange = useCallback(() => {
-    setWidth(computeWidth())
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('resize', onWithChange)
-
-    return () => {
-      window.removeEventListener('resize', onWithChange)
-    }
-  }, [])
-
   return (
     <Document file={src} onLoadSuccess={onDocumentLoadSuccess}>
-      <Page pageNumber={pageNumber} />
+      <div
+        style={{
+          height: pageRef?.current?.height,
+        }}
+        ref={ref}
+        className="border-2 border-gray-300 text-center w-full"
+      >
+        <div className="bg-gray-100 h-10 flex flex-row items-center space-x-3 font-bold mb-5">
+          <Select
+            value={pageNumber.toString()}
+            onValueChange={(value) => setPageNumber(Number(value))}
+          >
+            <SelectTrigger className="w-20 bg-white">
+              <SelectValue placeholder="Select a page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {new Array(numPages).fill(null).map((_, index) => {
+                  const pageNumber = index + 1
+
+                  return (
+                    <SelectItem key={index} value={pageNumber.toString()}>
+                      {pageNumber}
+                    </SelectItem>
+                  )
+                })}
+              </SelectGroup>
+              <SelectSeparator />
+            </SelectContent>
+          </Select>
+          <span>/</span>
+          <p>{numPages}</p>
+        </div>
+        {ref.current && (
+          <Page
+            canvasRef={pageRef}
+            width={ref.current.clientWidth}
+            pageNumber={pageNumber}
+          />
+        )}
+      </div>
     </Document>
   )
 }
