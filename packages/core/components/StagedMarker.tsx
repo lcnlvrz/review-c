@@ -23,7 +23,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { cn } from 'ui'
 
-const MESSAGE_INPUT_CONTAINER = 'message-input-container'
+const MESSAGE_INPUT_CONTAINER = 'review-c-message-input-container'
 
 dayjs.extend(relativeTime)
 
@@ -99,10 +99,7 @@ export const StagedMarker = (props: {
         marker={props.stagedMarker}
       />
       <MessageContainer
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
+        id={MESSAGE_INPUT_CONTAINER}
         style={floating.floatingStyles}
         ref={floating.refs.setFloating}
       >
@@ -189,13 +186,23 @@ export const StagedMarkerListener = (props: {
   const onSelection = useCallback((event: MouseEvent) => {
     const selection = window.document.getSelection()
 
+    const stagedInputContainer = ctx.PORTAL_SHADOW_ID
+      ? getContentShadowDomRef(MESSAGE_INPUT_CONTAINER)
+      : window.document.getElementById(MESSAGE_INPUT_CONTAINER)
+
+    const clickedInsideMessageInput = stagedInputContainer?.contains(
+      event.target as HTMLElement
+    )
+
     if (!selection.toString()) {
+      if (!clickedInsideMessageInput) {
+        props.setStagedMarker(undefined)
+      }
+
       return
     }
 
     const range = selection.getRangeAt(0)
-
-    console.log('range', range)
 
     let startChildrenNodeIndex: number = 0
     let endChildrenNodeIndex: number = 0

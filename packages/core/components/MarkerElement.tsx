@@ -71,7 +71,7 @@ const SelectionHighlights = (
       {selectionHighlights.map((highlight, index) => {
         return (
           <AbsoluteContainer
-            className="bg-black/10 pointer-events-none"
+            className="bg-black/50 pointer-events-none"
             key={index}
             point={highlight}
             style={{

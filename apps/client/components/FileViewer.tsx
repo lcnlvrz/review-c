@@ -1,20 +1,15 @@
-import { Spinner } from './Spinner'
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Document, Page } from 'react-pdf'
-import { pdfjs } from 'react-pdf'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Document, Page, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
+import 'react-pdf/dist/esm/Page/TextLayer.css'
+import { Spinner } from './Spinner'
 import {
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-  Table,
   Select,
   SelectContent,
   SelectGroup,
@@ -22,11 +17,13 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from 'ui'
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
-import 'react-pdf/dist/esm/Page/TextLayer.css'
-import { ReviewType } from '.prisma/client'
-import { reviewTypesOpts } from '@/constants/review'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`
 

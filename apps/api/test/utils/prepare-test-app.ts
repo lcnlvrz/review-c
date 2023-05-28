@@ -1,12 +1,10 @@
-import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
+import { execSync } from 'child_process'
+import * as path from 'path'
 import { AppModule } from 'src/app.module'
 import { configApp } from 'src/config'
-import { v4 as uuid } from 'uuid'
-import { execSync } from 'child_process'
 import { DatabaseService } from 'src/modules/database/database.service'
-import * as path from 'path'
-import { executionAsyncId } from 'async_hooks'
+import { v4 as uuid } from 'uuid'
 
 const generateUniqueDatabaseName = (): string => {
   return `test_${uuid().replace(/-/g, '')}_${new Date().getTime()}`
