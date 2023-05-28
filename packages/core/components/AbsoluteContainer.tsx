@@ -16,8 +16,9 @@ export const AbsoluteContainer = React.forwardRef<
       className={cn('absolute', className)}
       style={{
         ...style,
-        top: point.top,
-        left: point.left,
+        transform: `translate(${point.left}px, ${point.top}px)`,
+        top: 0,
+        left: 0,
       }}
       {...props}
     />

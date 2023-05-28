@@ -9,7 +9,8 @@ import { ConfirmDeleteThread } from './ConfirmDeleteThread'
 import { PointCoordinates } from './MarkerElement'
 import { MessageContainer, MessageContent } from './Message'
 import { MessageInput } from './MessageInput'
-import { MessageOptions } from './MessageOptions'
+import { MessageOptions, MessageOptionsContainer } from './MessageOptions'
+import { ResolveThread } from './ResolveThread'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { AddMessageToThreadInput, MessagePopulated } from 'common'
@@ -55,7 +56,7 @@ const AddMessageToThread = (props: Omit<MessageFormProps, 'onSubmit'>) => {
           setIsLoading(false)
         })
     },
-    [ctx.reviewSession]
+    [ctx.reviewSession, props.threadId]
   )
 
   return <MessageForm onSubmit={onAddMessageToThread} {...props} />
@@ -159,10 +160,12 @@ const Reply = (props: {
   const ctx = useReview()
 
   return (
-    <div className="relative">
+    <div className="relativ">
       {!editCtrl.isOpen && <MessageContent message={props.message} />}
 
-      <MessageOptions onDelete={props.onDelete} onEdit={editCtrl.toggle} />
+      <MessageOptionsContainer>
+        <MessageOptions onDelete={props.onDelete} onEdit={editCtrl.toggle} />
+      </MessageOptionsContainer>
       {ctx.auth.id === props.message.sentById && editCtrl.isOpen && (
         <MessageForm
           onSubmit={(data, done) =>
@@ -290,11 +293,15 @@ export const Thread = (props: {
               onClose={deleteThreadCtrl.onClose}
               ctrl={deleteThreadCtrl}
             />
-            <MessageOptions
-              className="p-4"
-              onEdit={editCtrl.toggle}
-              onDelete={deleteThreadCtrl.toggle}
-            />
+            <MessageOptionsContainer className="p-4">
+              <div className="flex flex-row items-center">
+                <ResolveThread threadId={props.threadId} />
+                <MessageOptions
+                  onEdit={editCtrl.toggle}
+                  onDelete={deleteThreadCtrl.toggle}
+                />
+              </div>
+            </MessageOptionsContainer>
           </>
         )}
       </div>

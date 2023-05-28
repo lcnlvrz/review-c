@@ -348,6 +348,17 @@ export class ReviewService {
     })
   }
 
+  async resolveThread(input: { thread: Thread }) {
+    await this.dbService.thread.update({
+      where: {
+        id: input.thread.id,
+      },
+      data: {
+        resolvedAt: new Date(),
+      },
+    })
+  }
+
   async deleteMessageFromThread(input: { message: Message }) {
     await this.dbService.message.delete({
       where: {

@@ -1,5 +1,5 @@
-import { useAPI } from './useAPI'
 import { useQuery } from '@tanstack/react-query'
+import { useAPI } from 'core'
 
 const WORKSPACES_QUERY_KEY = 'workspaces'
 

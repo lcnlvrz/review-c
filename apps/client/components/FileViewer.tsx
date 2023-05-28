@@ -41,7 +41,7 @@ const ImageViewer = (props: Props) => {
   )
 }
 
-const PDFViewer = React.memo((props: Props) => {
+const PDFViewer = (props: Props) => {
   const [numPages, setNumPages] = useState<number>()
   const [pageNumber, setPageNumber] = useState(1)
   const [src] = useState(props.src)
@@ -72,7 +72,7 @@ const PDFViewer = React.memo((props: Props) => {
       <Page width={width} pageNumber={pageNumber} />
     </Document>
   )
-})
+}
 
 const DocxViewer = (props: Props) => {
   const [isLoading, setIsLoading] = useState(false)
@@ -211,29 +211,31 @@ const CSVViewer = (props: Props) => {
 
 const FileViewer = (props: { extension: string; src: string }) => {
   return (
-    <div className="mt-5">
-      {(() => {
-        switch (props.extension) {
-          case 'gif':
-          case 'jpg':
-          case 'jpeg':
-          case 'png':
-            return <ImageViewer src={props.src} />
+    <div className="mt-5 items-center flex justify-center ">
+      <div className="w-full max-w-5xl">
+        {(() => {
+          switch (props.extension) {
+            case 'gif':
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+              return <ImageViewer src={props.src} />
 
-          case 'pdf':
-            return <PDFViewer src={props.src} />
+            case 'pdf':
+              return <PDFViewer src={props.src} />
 
-          case 'doc':
-          case 'docx':
-            return <DocxViewer src={props.src} />
+            case 'doc':
+            case 'docx':
+              return <DocxViewer src={props.src} />
 
-          case 'csv':
-            return <CSVViewer src={props.src} />
+            case 'csv':
+              return <CSVViewer src={props.src} />
 
-          default:
-            return null
-        }
-      })()}
+            default:
+              return null
+          }
+        })()}
+      </div>
     </div>
   )
 }

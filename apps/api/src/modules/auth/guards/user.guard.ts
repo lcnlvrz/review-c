@@ -30,6 +30,8 @@ export class UserGuard implements CanActivate {
       request.cookies[JWT_SESSION_COOKIE_NAME] ||
       request.header('Authorization')
 
+    console.log('token', token)
+
     if (!token) {
       this.throwUnauthorized()
     }
@@ -39,6 +41,7 @@ export class UserGuard implements CanActivate {
     try {
       claims = this.jwtService.verify(token)
     } catch (err) {
+      console.log('err', err)
       this.throwUnauthorized()
     }
 

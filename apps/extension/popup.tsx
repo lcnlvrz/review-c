@@ -9,13 +9,14 @@ import { API_BASE_URL, HttpClient } from 'clients'
 import { SignOutReviewSession } from '~components/SignOutReviewSession'
 import { useReviewSession } from '~hooks/useReviewSession'
 import type { Host } from '~lib/resolve-host'
-import { HTTPClientProvider } from '~providers/HTTPClientProvider'
+import { HTTPClientProvider } from 'core'
 
 const Layout = (props: { host: Host; token: string }) => {
   const [httpClient] = useState(
-    new HttpClient(API_BASE_URL, {
-      Cookie: `review-c_session=${props.token}`,
-    })
+    () =>
+      new HttpClient(API_BASE_URL, {
+        Authorization: props.token,
+      })
   )
 
   const { currentReviewSession } = useReviewSession(props.host.host)
@@ -35,7 +36,7 @@ const ToggleReview = (props: { host: Host }) => {
   const { auth, requestSignIn, token } = useAuth()
 
   return (
-    <div className="flex items-center  justify-center w-[15rem] h-[20rem]">
+    <div className="flex p-5 items-center justify-center w-[17rem] h-[25rem]">
       {!auth || !token ? (
         <GoogleLoginBtn onClick={requestSignIn} />
       ) : (

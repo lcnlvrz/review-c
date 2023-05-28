@@ -17,6 +17,7 @@ import { useReviews } from '~hooks/useReviews'
 import { useWorkspaces } from '~hooks/useWorkspaces'
 import type { Host } from '~lib/resolve-host'
 import { reviewSchema, type ReviewSchema } from '~schemas/review.schema'
+import { useAuth } from '~hooks/useAuth'
 
 export type DeepRequired<T> = {
   [K in keyof Required<T>]: Required<DeepRequired<T[K]>>
@@ -105,6 +106,7 @@ const Form = (props: { host: Host }) => {
   const fields = methods.watch()
 
   const { startReviewSession } = useReviewSession(props.host.host)
+  const { logout } = useAuth()
 
   const onSubmit = useCallback((data: DeepRequired<ReviewSchema>) => {
     startReviewSession(data)
@@ -120,10 +122,18 @@ const Form = (props: { host: Host }) => {
         {fields.workspace && <ReviewSelect host={props.host} />}
       </div>
 
-      <div>
+      <div className="flex flex-col space-y-2">
         <Button type="submit" className="w-lg text-white w-full">
           <Edit className="w-[1rem] h-[1rem] mr-[10px]" />
           Start reviewing
+        </Button>
+        <Button
+          className="w-full"
+          variant="ghost"
+          onClick={logout}
+          type="button"
+        >
+          Logout
         </Button>
       </div>
     </form>

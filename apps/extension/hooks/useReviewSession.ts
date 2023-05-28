@@ -1,6 +1,5 @@
 import { useStorage } from '@plasmohq/storage/hook'
 import { useCallback } from 'react'
-import type { ReviewSchema } from '~schemas/review.schema'
 
 export interface ReviewingState {
   hosts: string[]

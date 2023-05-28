@@ -24,7 +24,7 @@ type FetchError<T = unknown> = {
 export class HttpClient {
   constructor(
     private baseUrl: string,
-    private readonly headers: {
+    public readonly headers: {
       [k: string]: string
     } = {}
   ) {}
@@ -46,6 +46,8 @@ export class HttpClient {
       },
       body: options.body,
     }
+
+    console.log('final headers', params.headers)
 
     if (options.body instanceof FormData) {
       const data = new URLSearchParams()

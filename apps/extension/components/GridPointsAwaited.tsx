@@ -1,5 +1,5 @@
 import { WaitForQuery } from './WaitForQuery'
-import { GridPoints } from 'core'
+import { GridMarkers } from 'core'
 import { useReviewDetail } from '~hooks/useReviewDetail'
 import type { Host } from '~lib/resolve-host'
 
@@ -10,7 +10,7 @@ export const GridPointsAwaited = (props: { host: Host }) => {
 
   return (
     <WaitForQuery query={query}>
-      {({ data }) => <GridPoints threads={data.threads} />}
+      {({ data }) => <GridMarkers threads={data.threads} />}
     </WaitForQuery>
   )
 }

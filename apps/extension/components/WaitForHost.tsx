@@ -18,7 +18,6 @@ export const WaitForHost = (props: { children: React.FC<{ host: Host }> }) => {
         host,
       })}
       <div id={PORTAL_ID} />
-      {/* <div className="z-[1000]" id={EXTRA_PORTAL_ID} /> */}
     </>
   )
 }

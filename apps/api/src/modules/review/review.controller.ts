@@ -83,6 +83,20 @@ export class ReviewController {
     })
   }
 
+  @Put(':workspaceId/review/:reviewId/thread/:threadId/resolve')
+  @UseGuards(
+    UserGuard,
+    WorkspaceGuard,
+    ReviewGuard,
+    ThreadGuard,
+    ThreadOwnershipGuard
+  )
+  async resolveThread(@ReqThread() thread: Thread) {
+    return await this.reviewService.resolveThread({
+      thread,
+    })
+  }
+
   @Delete(':workspaceId/review/:reviewId/thread/:threadId/message/:messageId')
   @UseGuards(
     UserGuard,

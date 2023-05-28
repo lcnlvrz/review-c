@@ -22,6 +22,10 @@ export const createSafeNodeRange = (selection: Omit<Selection, 'id'>) => {
   const startContainer = queryDomElemXPath(selection.startContainerXPath)
   const endContainer = queryDomElemXPath(selection.endContainerXPath)
 
+  if (!startContainer || !endContainer) {
+    return range
+  }
+
   range.setStart(
     startContainer.childNodes.item(selection.startChildrenNodeIndex),
     selection.startOffset
