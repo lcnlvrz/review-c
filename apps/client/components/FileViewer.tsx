@@ -41,12 +41,18 @@ const ImageViewer = (props: Props) => {
   )
 }
 
+const WIDTH_SUBTRACT = 250
+
 const PDFViewer = (props: Props) => {
   const [numPages, setNumPages] = useState<number>()
   const [pageNumber, setPageNumber] = useState(1)
   const [src] = useState(props.src)
 
-  const [width, setWidth] = useState(window.innerWidth)
+  const computeWidth = useCallback(() => {
+    return window.innerWidth - WIDTH_SUBTRACT
+  }, [])
+
+  const [width, setWidth] = useState(() => computeWidth())
 
   const onDocumentLoadSuccess = useCallback(
     ({ numPages }: { numPages: number }) => {
@@ -56,7 +62,7 @@ const PDFViewer = (props: Props) => {
   )
 
   const onWithChange = useCallback(() => {
-    setWidth(window.innerWidth - 250)
+    setWidth(computeWidth())
   }, [])
 
   useEffect(() => {
@@ -69,7 +75,7 @@ const PDFViewer = (props: Props) => {
 
   return (
     <Document file={src} onLoadSuccess={onDocumentLoadSuccess}>
-      <Page width={width} pageNumber={pageNumber} />
+      <Page pageNumber={pageNumber} />
     </Document>
   )
 }

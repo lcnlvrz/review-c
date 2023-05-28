@@ -52,6 +52,8 @@ const SelectionHighlights = (
 
     const range = createSafeNodeRange(props.selection)
 
+    console.log('range highlight', range)
+
     const rects = range.getClientRects()
 
     for (let i = 0; i < rects.length; i++) {
@@ -67,6 +69,8 @@ const SelectionHighlights = (
 
     setSelectionHighlights(highlights)
   }, [props.selection])
+
+  console.log('highlights', selectionHighlights)
 
   return (
     <div className="selection-highlights">

@@ -66,7 +66,7 @@ export const MessageAuthor = React.forwardRef<
 })
 
 export const MessageFiles = React.forwardRef<
-  React.ElementRef<typeof ImageGallery>,
+  React.ComponentRef<typeof ImageGallery>,
   React.ComponentPropsWithoutRef<typeof ImageGallery>
 >((props, ref) => {
   return (
@@ -81,7 +81,7 @@ export const MessageAvatar = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof Avatar> & { avatar: string }
 >(({ avatar, ...props }, ref) => {
   return (
-    <Avatar className="mt-1" {...props}>
+    <Avatar ref={ref} className="mt-1" {...props}>
       <AvatarImage src={avatar} />
     </Avatar>
   )

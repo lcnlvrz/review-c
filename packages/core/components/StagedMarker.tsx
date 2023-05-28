@@ -23,6 +23,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { cn } from 'ui'
 
+const MESSAGE_INPUT_CONTAINER = 'message-input-container'
+
 dayjs.extend(relativeTime)
 
 export const StagedMarker = (props: {
@@ -97,6 +99,10 @@ export const StagedMarker = (props: {
         marker={props.stagedMarker}
       />
       <MessageContainer
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
         style={floating.floatingStyles}
         ref={floating.refs.setFloating}
       >
@@ -183,29 +189,25 @@ export const StagedMarkerListener = (props: {
   const onSelection = useCallback((event: MouseEvent) => {
     const selection = window.document.getSelection()
 
-    const startNode = selection.anchorNode
-    const endNode = selection.focusNode
-
-    if (
-      !selection.toString() ||
-      (endNode.nodeType !== TEXT_NODE_TYPE &&
-        startNode.nodeType !== TEXT_NODE_TYPE)
-    )
+    if (!selection.toString()) {
       return
+    }
 
     const range = selection.getRangeAt(0)
 
-    let startChildrenNodeIndex = 0
-    let endChildrenNodeIndex = 0
+    console.log('range', range)
+
+    let startChildrenNodeIndex: number = 0
+    let endChildrenNodeIndex: number = 0
 
     range.startContainer.parentElement.childNodes.forEach((node, index) => {
-      if (node.isEqualNode(startNode)) {
+      if (node.isEqualNode(range.startContainer)) {
         startChildrenNodeIndex = index
       }
     })
 
     range.endContainer.parentElement.childNodes.forEach((node, index) => {
-      if (node.isEqualNode(endNode)) {
+      if (node.isEqualNode(range.endContainer)) {
         endChildrenNodeIndex = index
       }
     })
@@ -220,9 +222,9 @@ export const StagedMarkerListener = (props: {
         left: event.pageX,
         visible: true,
         startContainerXPath: getXPath(range.startContainer.parentElement),
+        endContainerXPath: getXPath(range.endContainer.parentElement),
         startOffset: range.startOffset,
         endOffset: range.endOffset,
-        endContainerXPath: getXPath(range.endContainer.parentElement),
       },
     }
 
@@ -248,6 +250,8 @@ export const StagedMarkerListener = (props: {
       console.log('clicked toolkit')
       return
     }
+
+    console.log('clicked')
 
     const target = event.target as HTMLElement
 
