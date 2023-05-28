@@ -54,7 +54,6 @@ export const useScreenshot = (initialValue: Screenshot[] = []) => {
         xhr.onload = function () {
           if (this.status >= 200 && this.status < 300) {
             setScreenshots((screenshots) => {
-              console.log('screenshots on xr', screenshots)
               return screenshots.map((screenshot) => {
                 if (screenshot.name === file.name) {
                   screenshot.isLoading = false
@@ -111,10 +110,7 @@ export const useScreenshot = (initialValue: Screenshot[] = []) => {
 
   const clearScreenshots = useCallback(() => {
     setScreenshots([])
-    console.log('clear')
   }, [])
-
-  console.log('screenshots', screenshots)
 
   return {
     screenshots,

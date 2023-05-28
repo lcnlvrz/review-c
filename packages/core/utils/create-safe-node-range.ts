@@ -26,15 +26,14 @@ export const createSafeNodeRange = (selection: Omit<Selection, 'id'>) => {
     return range
   }
 
-  range.setStart(
-    startContainer.childNodes.item(selection.startChildrenNodeIndex),
-    selection.startOffset
+  const startNode = startContainer.childNodes.item(
+    selection.startChildrenNodeIndex
   )
 
-  range.setEnd(
-    endContainer.childNodes.item(selection.endChildrenNodeIndex),
-    selection.endOffset
-  )
+  const endNode = endContainer.childNodes.item(selection.endChildrenNodeIndex)
+
+  range.setStart(startNode, selection.startOffset)
+  range.setEnd(endNode, selection.endOffset)
 
   return range
 }
